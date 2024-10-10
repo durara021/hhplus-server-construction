@@ -23,7 +23,7 @@ sequenceDiagram
     end
 
     alt 대기 상태에서 서비스 상태로 변경
-        Scheduler ->> Database: 대기 시간 만료 후 유저 대기 상태 변경 (wait -> service)
+        Scheduler ->> Database: 대기 시간 만료 후 유저 대기 상태 변경 (wait -> active)
         Database -->> Queue: 유저의 상태 변경
     end
 
@@ -33,7 +33,7 @@ sequenceDiagram
     end
 
     alt 대기 상태 분류 후 일정 시간 경과 시 상태 변경
-        Scheduler ->> Database: 유저 상태 변경 (service -> complete)
+        Scheduler ->> Database: 유저 상태 변경 (active -> expire)
         Database -->> Queue: 유저의 상태 변경 결과 반환
         Queue -->> User: 시간 만료 알림
     end
@@ -106,7 +106,7 @@ sequenceDiagram
     Database ->> Payment: 금액/상태 이력추가 결과 반환
     Payment ->> Database: 잔액 변경
     Database ->> Payment: 잔액 변경 결과 반환
-    Payment ->> Database: 대기열 상태 변경(service -> complete)
+    Payment ->> Database: 대기열 상태 변경(active -> expire)
     Database ->> Payment: 상태변경 결과 반환
     Payment ->> User: 결재 결과 반환
     end
