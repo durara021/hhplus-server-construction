@@ -386,7 +386,7 @@ sequenceDiagram
     "concertDate": 2024-10-11,
     "concertSeat": 1,
     "stat": "booked",
-    "tokenStat": "complete"
+    "tokenStat": "expire"
   }
   ```
   - **실패 (401 Unauthorized)**:
