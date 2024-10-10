@@ -283,7 +283,7 @@ sequenceDiagram
   ```
 ---
 ### 5. 금액 충전 (Balance Charge)
-- **URL**: `/account/charges`
+- **URL**: `/payment/charges`
 - **Method**: `PATCH`
 - **Description**: 특정 userId의 계좌에 amount만큼 충전 및 이력 추가
 - **Headers:**
@@ -324,7 +324,7 @@ sequenceDiagram
 ---
 
 ### 6. 잔액 조회 요청 (Balance Inquiry)
-- **URL**: /account/accounts
+- **URL**: /payment/accounts
 - **Method**: GET
 - **Description**: 특정 userId의 point 반환
 - **Headers:**
