@@ -263,10 +263,10 @@ sequenceDiagram
   - **성공 (200)**:
   ```json
   {
-    "ticketId": ticketId1,
-    "userId": userId1
-    "concertDate": concertDate1,
-    "concertSeat": concertSeat1,
+    "ticketId": 1,
+    "userId": 1
+    "concertDate": 2024-10-11,
+    "concertSeat": 1,
     "seatStatus": "temp"
   }
   ```
