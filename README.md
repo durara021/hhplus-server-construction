@@ -160,7 +160,7 @@ sequenceDiagram
     ```json
     {
       "userToken": "qlekjr2...",
-      "tokenStatus": "wait".
+      "tokenStatus": "wait"
       "message": "현재 대기열은 n명입니다."
     }
     ```
