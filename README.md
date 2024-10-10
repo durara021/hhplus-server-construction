@@ -215,7 +215,8 @@ sequenceDiagram
 ```
 - **Path Parameters:**
 ```json
-  concertId: string date: string
+    concertId: string,
+    date: string
 ```
 - **Response:**
   - **성공 (200)**:
@@ -254,8 +255,8 @@ sequenceDiagram
 - **Request Body:**
 ```json
 {
-  "ticketId": ticketId1,
-  "userId": userId1
+  "ticketId": "ticketId1",
+  "userId": "1"
 }
 ```
 - **Response:**
@@ -294,19 +295,19 @@ sequenceDiagram
 - **Request Body:**
 ```json
 {
-  "userId": userId1,
-  "amount": 50000
+  "userId": "userId1",
+  "amount": "50000"
 }
 ```
 - **Response:**
   - **성공 (200)**:
   ```json
   {
-    "userName": userName1,
-    "amount": amount,
-    "point": point,
+    "userName": "userName1",
+    "amount": 50000,
+    "point": 100000,
     "accountStat": "충전완료",
-    "regDate": "Date.now()"
+    "regDate": Date.now()
   }
   ```
   - **실패 (401 Unauthorized)**:
@@ -334,8 +335,8 @@ sequenceDiagram
 - **Request Body:**
 ```json
 {
-  "userId": userId1,
-  "amount": 40000
+  "userId": "userId1",
+  "amount": "40000"
 }
 ```
 - **Response:**
@@ -343,7 +344,7 @@ sequenceDiagram
   ```json
   {
     "userName": "userName",
-    "point": point
+    "point": 150000
   }
   ```
   - **실패 (401 Unauthorized)**:
@@ -371,8 +372,8 @@ sequenceDiagram
 - **Request Body:**
 ```json
   {
-    "ticketId": "{ticketId}",
-    "userId": "{userId}"
+    "ticketId": "1",
+    "userId": "1"
   }
 ```
 - **Response:**
@@ -382,8 +383,8 @@ sequenceDiagram
     "ticketId": "ticketId",
     "userName": "userName",
     "concertTitle": "concertTitle",
-    "concertDate": "concertDate",
-    "concertSeat": "concertSeat",
+    "concertDate": 2024-10-11,
+    "concertSeat": 1,
     "stat": "booked",
     "tokenStat": "complete"
   }
