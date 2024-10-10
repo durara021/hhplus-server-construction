@@ -1,34 +1,59 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 
-@Controller('payment')
+@Controller('payments')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentService.create(createPaymentDto);
+  @Patch('/charges')
+  async charge(
+    @Param() userId: string,
+    @Param() amount: string,
+  ) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: '',
+      data: {
+        "userName": "userName1",
+        "amount": 50000,
+        "point": 100000,
+        "accountStat": "충전완료",
+        "regDate": Date.now()
+      },
+    };
   }
 
-  @Get()
-  findAll() {
-    return this.paymentService.findAll();
+  @Get('/:userId/accounts')
+  async account(
+    @Param('userId') userId: string,
+  ) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: '',
+      data: {
+        "userName": 1,
+        "account": 150000
+      },
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
+  @Get('/pay')
+  async payment(
+    @Param('ticketId') ticketId: string,
+    @Param('userId') userId: string,
+  ) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: '',
+      data: {
+        "ticketId": 1,
+        "userId": 1,
+        "stat": "booked",
+        "tokenStat": "complete"
+      },
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
-  }
 }
