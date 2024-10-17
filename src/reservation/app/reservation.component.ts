@@ -14,4 +14,8 @@ export class reservationComponent implements AbastractReservationComponent{
         const reserveResult = await this.concertService.reserve(itemId, userId, capacity);
         return reserveResult.id;
     }
+
+    async availableSeats(categoryId: number, itemId: number) {
+        return this.concertService.availableSeats(categoryId, itemId);
+    }
 }

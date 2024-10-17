@@ -1,5 +1,4 @@
-import { EntityManager, Repository } from "typeorm";
-import { ConcertEntity } from "../../domain/entities/concert.entity";
+import { EntityManager, Not, Repository } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { AbstractConcertTicketRepository } from "../../domain/repository.interfaces";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -21,7 +20,10 @@ export class ConcertTicketRepository implements AbstractConcertTicketRepository 
   }
 
   async reservedTickets(concertTicketEntity:ConcertTicketEntity): Promise<ConcertTicketEntity[]> {
-    return this.autoManagerRepository.proxyInstance.find({where: {concertPlanId: concertTicketEntity.concertPlanId}});
+    return this.autoManagerRepository.proxyInstance.find({where: {
+      concertPlanId: concertTicketEntity.concertPlanId,
+      status: Not(null),
+    }});
   }
 
   async reserve(concertTicketEntity:ConcertTicketEntity): Promise<ConcertTicketEntity> {

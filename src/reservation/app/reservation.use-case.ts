@@ -16,6 +16,10 @@ export class ReservationUsecase {
     //임시 예약
     async reserve(category:string, categoryId:number, itemId:number, userId:number): Promise<ResPostDto> {
         return await this.dataSource.transaction(async () => {
+            const availableSeats = await this.reservationComponent.availableSeats(categoryId, itemId);
+
+            if(! availableSeats.includes(itemId)) throw new Error("선택할 수 없는 좌석입니다.");
+            
             //임시 예약
             const reserveResult = await this.reservationService.reserve(category, categoryId, itemId, userId);
 
