@@ -466,6 +466,6 @@ sequenceDiagram
 # 🎟️ 콘서트 티켓팅 프로젝트 ERD
 ![스크린샷 2024-10-11 031715](https://github.com/user-attachments/assets/4a832053-8e6c-43c6-a91f-650b52e45555)
 
-API SWAGGER
+# API SWAGGER
 ![Screenshot 2024-10-18 at 06 59 5911](https://github.com/user-attachments/assets/d5bcc87c-455e-436f-84b6-c4e9808100b4)
 
