@@ -1,10 +1,10 @@
 import { Global, Module } from '@nestjs/common';
-import { UserValidationGuard } from './user-validation.guard';
 import { UserModule } from '../../user/user.module';
+import { SessionGuard } from './session.guard';
 
 @Global()
 @Module({
     imports: [ UserModule ],
-    providers: [ UserValidationGuard ]
+    providers: [ SessionGuard ]
 })
 export class GuardModule {}

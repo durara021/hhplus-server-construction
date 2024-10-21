@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConcertService } from './app/concert.service';
+import { ConcertService } from './domain/concert.service';
 import { AbstractConcertService } from './domain/service.interfaces';
 import { ConcertController } from './pres/concert.controller';
 import { AbstractConcertPlanRepository, AbstractConcertRepository, AbstractConcertTicketRepository } from './domain/repository.interfaces';

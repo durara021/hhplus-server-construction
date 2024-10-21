@@ -19,8 +19,11 @@ export class AccountRepository implements AbstractAccountRepository {
     this.autoManagerRepository = new AutoManagerRepository(this.repository, this.entityManager);
   }
 
-  async charge(accountEntity: AccountEntity): Promise<AccountEntity> {
-    await this.autoManagerRepository.proxyInstance.update({userId: accountEntity.userId}, { balance: () => `balance + ${accountEntity.balance}`});
+  async update(accountEntity: AccountEntity): Promise<AccountEntity> {
+    await this.autoManagerRepository.proxyInstance.update(
+      {userId: accountEntity.userId},
+      {balance: accountEntity.balance}
+    );
 
     return await this.autoManagerRepository.proxyInstance.findOne({where: {userId: accountEntity.userId}});
   }
@@ -28,15 +31,4 @@ export class AccountRepository implements AbstractAccountRepository {
   async point(accountEntity:AccountEntity): Promise<AccountEntity> {
     return await this.autoManagerRepository.proxyInstance.findOne({where : {userId: accountEntity.userId}});
   }
-  
-  async use(accountEntity: AccountEntity): Promise<AccountEntity> {
-    await this.autoManagerRepository.proxyInstance.createQueryBuilder()
-      .update('AccountEntity') 
-      .set({ balance: accountEntity.balance }) 
-      .where('userId = :userId', { userId: accountEntity.userId })
-      .execute();
-
-    return await this.autoManagerRepository.proxyInstance.findOne({where: {userId: accountEntity.userId}});
-  }
-
 }

@@ -2,11 +2,11 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class ReservationPostResponseDto {
     @ApiProperty({ description: '예약 구분' })
-    category: string;
+    mainCateg: number;
     @ApiProperty({ description: '예약 대분류 id' })
-    categoryId: number;
+    subCateg: number;
     @ApiProperty({ description: '예약 소분류 id' })
-    itemId: number;
+    minorCateg: number;
     @ApiProperty({ description: '예약자' })
     userId: number;
     @ApiProperty({ description: '등록일' })
@@ -17,17 +17,17 @@ export class ReservationPostResponseDto {
     modDate: Date | null;
 
     constructor(
-        category: string,
-        categoryId: number,
-        itemId: number,
+        mainCateg: number,
+        subCateg: number,
+        minorCateg: number,
         userId: number,
         regDate: Date,
         status: string,
         modDate: Date | null,
     ) {
-        this.category = category;
-        this.categoryId = categoryId;
-        this.itemId = itemId;
+        this.mainCateg = mainCateg;
+        this.subCateg = subCateg;
+        this.minorCateg = minorCateg;
         this.userId = userId;
         this.regDate = regDate;
         this.status = status;

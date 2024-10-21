@@ -1,5 +1,5 @@
-import { EntityManager, Repository } from "typeorm";
-import { SessionEntity } from "../../domain/entitiy.interfaces/session.entity";
+import { EntityManager, Not, Repository } from "typeorm";
+import { SessionEntity } from "../../domain/entities/session.entity";
 import { Injectable } from "@nestjs/common";
 import { AbstractSessionRepository } from "../../domain/repository.interfaces";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -24,7 +24,20 @@ export class SessionRepository implements AbstractSessionRepository {
   }
 
   async session(sessionEntity: SessionEntity): Promise<SessionEntity> {
-    return await this.autoManagerRepository.proxyInstance.findOne({where: {userId : sessionEntity.userId}});
+    return await this.autoManagerRepository.proxyInstance.findOne(
+      { where: { uuid : sessionEntity.uuid, } }
+    );
   }
   
+  async expire(sessionEntity: SessionEntity): Promise<SessionEntity> {
+    await this.autoManagerRepository.proxyInstance.update(
+      { uuid : sessionEntity.uuid },
+      { status: sessionEntity.status }
+    );
+
+    return this.autoManagerRepository.proxyInstance.findOne(
+      { where : { uuid: sessionEntity.uuid } }
+    );
+  }
+
 }

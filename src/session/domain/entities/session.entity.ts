@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Unique } from 'typeorm';
 
+@Unique(['uuid'])
 @Entity('session')
 export class SessionEntity {
 
@@ -12,7 +13,10 @@ export class SessionEntity {
   @Column()
   userId: number;
 
-  @CreateDateColumn()
-  regDate: Date;
+  @Column()
+  status: string;
+
+  @CreateDateColumn({default: Date.now()})
+  regDate: number;
 
 }

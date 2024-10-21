@@ -1,8 +1,8 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Response } from 'express'; // 올바른 Express Response 타입을 가져옵니다.
 import { SessionUsecase } from '../app/session.use-case'; 
 import { SessionPostResponseDto as ResPostDto} from './dto';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { response } from 'express';
 
 @ApiTags('세션 API') // 컨트롤러 태그 설정
 @Controller('sessions')
@@ -18,14 +18,15 @@ export class SessionController {
     description: '성공',
     type: ResPostDto,
   })
-  async reserve(
+  async create(
     @Body('userId') userId: string,
-  ): Promise<ResPostDto> {
+    @Res() response: Response, // Express Response 객체 사용
+  ): Promise<void> {
     
     const createResult = await this.sessionUsecase.create(parseInt(userId));
     response.cookie('sessionId', createResult.uuid, { httpOnly: true, secure: true });
 
-    return new ResPostDto(createResult.uuid, createResult.userId, createResult.regDate);
+    response.status(201).send(new ResPostDto(createResult.uuid, createResult.userId, createResult.regDate));
   }
 
 }

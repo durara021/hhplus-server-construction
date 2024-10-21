@@ -1,61 +1,66 @@
-import { ConcertService } from '../concert/app/concert.service';
-import { AbstractConcertRepository, AbstractConcertPlanRepository, AbstractConcertTicketRepository } from '../concert/domain/repository.interfaces';
+import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
+import { AbstractConcertService } from '../concert/domain/service.interfaces';
+import { AbstractConcertPlanRepository, AbstractConcertRepository } from '../concert/domain/repository.interfaces';
+import { ConcertService } from '../concert/domain/concert.service';
 
-describe('ConcertService 단위테스트', () => {
-  let concertService: ConcertService;
-  let mockConcertRepository: AbstractConcertRepository;
-  let mockConcertPlanRepository: AbstractConcertPlanRepository;
-  let mockConcertTicketRepository: AbstractConcertTicketRepository;
+describe('ConcertService', () => {
+  let concertService: AbstractConcertService;
+  let concertRepository: AbstractConcertRepository;
+  let concertPlanRepository: AbstractConcertPlanRepository;
 
-  beforeEach(() => {
-    mockConcertRepository = {} as any;
-    mockConcertPlanRepository = {} as any;
-    mockConcertTicketRepository = {
-        reservedTickets: jest.fn().mockResolvedValue([]), // reservedTickets에서 빈 배열 반환하도록 모킹
-    } as any;
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ConcertService,
+        {
+          provide: AbstractConcertRepository,
+          useValue: {
+            concertInfo: jest.fn(),
+          },
+        },
+        {
+          provide: AbstractConcertPlanRepository,
+          useValue: {
+            concertPlanInfos: jest.fn(),
+            concertPlanInfo: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
 
-    concertService = new ConcertService(mockConcertRepository, mockConcertPlanRepository, mockConcertTicketRepository);
+    concertService = module.get<ConcertService>(ConcertService);
+    concertRepository = module.get<AbstractConcertRepository>(AbstractConcertRepository);
+    concertPlanRepository = module.get<AbstractConcertPlanRepository>(AbstractConcertPlanRepository);
   });
 
+  describe('콘서트 레포', () => {
+    it('콘서트가 등록되어 있지 않은 경우', async () => {
+      const concertId = 1;
 
-  describe('id 유효성 검사', () => {
-    const ids = [null, -30, 40.5];
-    const capacity = 1000;
-    ids.forEach(id =>{
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(concertService.concertInfo(id)).rejects.toThrow(`${id}는 입력할 수 없는 concertId형식입니다.`);
-      });
+      // concertInfo 메소드가 null을 반환하도록 모킹
+      jest.spyOn(concertRepository, 'concertInfo').mockResolvedValueOnce(null);
 
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(concertService.concertPlans(id)).rejects.toThrow(`${id}는 입력할 수 없는 concertId형식입니다.`);
-      });
-
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(concertService.concertPlanInfo(id)).rejects.toThrow(`${id}는 입력할 수 없는 concertPlanId형식입니다.`);
-      });
-
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(concertService.availableSeats(id, capacity)).rejects.toThrow(`${id}는 입력할 수 없는 concertPlanId형식입니다.`);
-      });
-
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(concertService.reserve(id, 1)).rejects.toThrow(`${id}는 입력할 수 없는 ticketId형식입니다.`);
-      });
-
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(concertService.reserve(1, id)).rejects.toThrow(`${id}는 입력할 수 없는 userId형식입니다.`);
-      });
-      
+      await expect(concertService.concertInfo(concertId)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('capacity 유효성 검사', () => {
-    const id = 1000;
-    const capacitys = [null, -30, 40.5];
-    capacitys.forEach(capacity =>{
-        it('정원에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-            await expect(concertService.availableSeats(id, capacity)).rejects.toThrow(`${capacity}는 입력할 수 없는 capacity형식입니다.`);
-        });
+  describe('콘서트 일정 레포', () => {
+    it('콘서트 일정이 없는 경우', async () => {
+      const concertId = 1;
+
+      // concertPlanInfos가 빈 배열을 반환하도록 모킹
+      jest.spyOn(concertPlanRepository, 'concertPlanInfos').mockResolvedValueOnce([]);
+
+      await expect(concertService.concertPlanInfos(concertId)).rejects.toThrow(NotFoundException);
+    });
+
+    it('콘서트 일정이 없는 경우(단일)', async () => {
+      const concertPlanId = 1;
+
+      // concertPlanInfo가 null을 반환하도록 모킹
+      jest.spyOn(concertPlanRepository, 'concertPlanInfo').mockResolvedValueOnce(null);
+      await expect(concertService.concertPlanInfo(concertPlanId)).rejects.toThrow(NotFoundException);
     });
   });
 

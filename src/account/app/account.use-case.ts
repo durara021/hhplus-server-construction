@@ -15,13 +15,11 @@ export class AccountUsecase {
     //포인트 충전
     async charge(userId: number, amount: number): Promise<ResPostDto> {
         return await this.dataSource.transaction(async () => {
-            let recordResult: AccountHistoryEntity;
-            const chargeResult = await this.accountService.charge(userId, amount);
+            const point = (await this.accountService.point(userId)).balance;
+            const balance = await this.accountService.charge(point, amount);
+            this.accountService.update(userId, balance);
             
-            if(chargeResult){
-                recordResult = await this.accountService.record(userId, amount, 'charge');
-            }
-
+            const recordResult = await this.accountService.record(userId, amount, 'charge');
             return new ResPostDto(recordResult.userId, recordResult.amount, recordResult.stat, recordResult.regDate);
         });
     }

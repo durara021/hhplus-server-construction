@@ -27,5 +27,4 @@ export class AccountHistoryRepository implements AbstractAccountHistoryRepositor
   async history(accoutHistoryEntity: AccountHistoryEntity): Promise<AccountHistoryEntity[]> {
     return await this.autoManagerRepository.proxyInstance.find({where: {userId: accoutHistoryEntity.userId}});
   }
-  
 }

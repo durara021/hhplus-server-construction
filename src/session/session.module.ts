@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { SessionService } from './app/session.service';
+import { SessionService } from './domain/session.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SessionEntity } from './domain/entitiy.interfaces';
+import { SessionEntity } from './domain/entities';
 import { SessionRepository } from './infra/repositories/session.repository';
 import { AbstractSessionRepository } from './domain/repository.interfaces';
 import { SessionController } from './pres/session.controller';

@@ -1,46 +1,36 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { SessionService } from '../../session/app/session.service';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
+import { AbstractSessionService } from '../../session/domain/service.interfaces/session.service.interface';
 
 @Injectable()
 export class SessionGuard implements CanActivate {
-  constructor(private readonly sessionService: SessionService) {}
+  constructor(private readonly sessionService: AbstractSessionService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const response: Response = context.switchToHttp().getResponse<Response>();
-
-    let sessionId = request.cookies['sessionId'];
-
-    if (!sessionId) {
-      // 세션 ID가 없으면 새로 생성
-      const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      });
-
-      const userId = Math.floor(Math.random() * 1000); // 임의의 userId 생성
-
-      // 세션 생성 및 저장
-      const createResult = await this.sessionService.create(uuid, userId);
-      response.cookie('sessionId', uuid, { httpOnly: true, secure: true });
-      request['sessionData'] = createResult;
-    } else {
-      // 기존 세션 ID가 있으면 해당 세션 데이터 조회
-      const sessionData = await this.sessionService.session(sessionId);
+    
+    const req = context.switchToHttp().getRequest<Request>();
       
-      if (!sessionData) {
-        // 세션 데이터가 없을 경우 새로운 세션 생성
-        const userId = Math.floor(Math.random() * 1000);
-        const createResult = await this.sessionService.create(sessionId, userId);
-        request['sessionData'] = createResult;
+    if (req.method === 'POST') {
+      // 쿠키에서 세션 ID를 추출 (또는 헤더에서 추출 가능)
+      const sessionId = req.cookies['sessionId'] || req.headers['sessionId'];
+      
+      // 세션 ID가 있는지 확인
+      if (sessionId) {
+        const session = await this.sessionService.session(sessionId.uuid);
+        
+
+        const sessionDuration = 1000 * 60 * 60;
+        const currentTime = Date.now();
+        if(session.regDate - currentTime > sessionDuration) {
+          this.sessionService.expire(session.uuid);
+          throw new UnauthorizedException('세션이 만료되었습니다.');
+        } else {
+          req['userId'] = session.userId; // userId를 요청 객체에 추가
+        }
       } else {
-        // 세션 데이터를 request 객체에 추가
-        request['sessionData'] = sessionData;
+        throw new UnauthorizedException('세션이 없습니다.00');
       }
     }
-
     return true;
   }
 }

@@ -1,4 +1,4 @@
-import { EntityManager, Repository } from "typeorm";
+import { EntityManager, In, Not, Repository } from "typeorm";
 import { ReservationEntity } from "../../domain/entities/reservation.entity";
 import { Injectable } from "@nestjs/common";
 import { AbstractReservationRepository } from "../../domain/repository.interfaces";
@@ -23,14 +23,52 @@ export class ReservationRepository implements AbstractReservationRepository {
     return await this.autoManagerRepository.proxyInstance.save(reservationEntity);
   }
 
-  async book(reservationEntity:ReservationEntity): Promise<ReservationEntity> {
-    await this.autoManagerRepository.proxyInstance.createQueryBuilder()
-      .update('ReservationEntity') 
-      .set({ balance: reservationEntity.status }) 
-      .where('userId = :userId', { userId: reservationEntity.id })
-      .execute();
+  async reservedItems(reservatioEntity: ReservationEntity): Promise<ReservationEntity[]> {
+    return await this.autoManagerRepository.proxyInstance.find(
+      { where: {
+          mainCateg: reservatioEntity.mainCateg,
+          subCateg: reservatioEntity.subCateg,
+          minorCateg: In([ 'temp', 'confirmed' ]),
+        }
+      } 
+    );
+  }
+
+  async statusUpdate(reservationEntity: ReservationEntity): Promise<ReservationEntity> {
+    await this.autoManagerRepository.proxyInstance.update(
+      { id: reservationEntity.id }, 
+      { status: reservationEntity.status }
+    )
 
     return await this.autoManagerRepository.proxyInstance.findOne({where: {userId: reservationEntity.id}});
   }
   
+  async statusesUpdate(reservationId: number[], status: string): Promise<number> {
+    const result = await this.autoManagerRepository.proxyInstance.update(
+      { id: In(reservationId) }, 
+      { status: status }
+    )
+
+    return result.affected;
+  }
+  async reservedItem(reservationEntity: ReservationEntity): Promise<ReservationEntity> {
+    return await this.autoManagerRepository.proxyInstance.findOne(
+      { where : {
+          mainCateg: reservationEntity.mainCateg,
+          subCateg: reservationEntity.subCateg,
+          minorCateg: reservationEntity.minorCateg,
+          status: Not('temp')
+        }
+      }
+    );
+  }
+
+  async itemsByStatus(reservationEntity: ReservationEntity): Promise<ReservationEntity[]> {
+    return await this.autoManagerRepository.proxyInstance.find(
+      { where : {
+          status: Not(reservationEntity.status)
+        }
+      }
+    );
+  }
 }

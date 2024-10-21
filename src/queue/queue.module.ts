@@ -1,7 +1,7 @@
 // queue.module.ts
 import { Module } from '@nestjs/common';
 import { QueueController } from './pres/queue.controller';
-import { QueueService } from './app/queue.service';
+import { QueueService } from './domain/queue.service';
 import { AbstractQueueService } from './domain/service.interfaces';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { QueueEntity } from './domain/entities';

@@ -14,16 +14,18 @@ export class QueueUsecase {
     async enter(userId: number, uuid: string): Promise<ResPostDto> {
         return await this.dataSource.transaction(async () => {
             const enterResult = await this.queueService.enter(userId, uuid);
+            const myPosition = await this.queueService.myPosition(enterResult.id);
 
-            return new ResPostDto(enterResult.position, enterResult.status);
+            return new ResPostDto(myPosition, enterResult.status);
         });
     }
 
     async myPosition(userId: number): Promise<ResGetDto> {
         return await this.dataSource.transaction(async () => {
-            const myPosition = await this.queueService.myPosition(userId);
+            const myQueueInfo = await this.queueService.myQueueInfo(userId);
+            const myPosition = await this.queueService.myPosition(myQueueInfo.id);
 
-            return new ResGetDto(myPosition.position, myPosition.status);
+            return new ResGetDto(myPosition, myQueueInfo.status);
         });
     }
 }

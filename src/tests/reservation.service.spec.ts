@@ -1,34 +1,44 @@
-import { ReservationService } from '../reservation/app/reservation.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AbstractReservationService } from '../reservation/domain/service.interfaces'; 
+import { ReservationService } from '../reservation/domain/reservation.service';
 import { AbstractReservationRepository } from '../reservation/domain/repository.interfaces';
+import { ReservationEntity } from '../reservation/domain/entities';
 
-describe('ReservationService 단위테스트', () => {
-  let reservationService: ReservationService;
-  let mockReservationRepository: AbstractReservationRepository;
 
-  beforeEach(() => {
-    mockReservationRepository = {} as any;
-    reservationService = new ReservationService(mockReservationRepository);
+describe('ReservationService - isAvailableItem', () => {
+  let reservationService: AbstractReservationService;
+  let reservationRepository: AbstractReservationRepository;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ReservationService,
+        {
+          provide: AbstractReservationRepository,
+          useValue: {
+            reservedItem: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    reservationService = module.get<ReservationService>(ReservationService);
+    reservationRepository = module.get<AbstractReservationRepository>(AbstractReservationRepository);
   });
 
+  it('should throw an error if the item is already reserved', async () => {
+    const mainCateg = 1;
+    const subCateg = 2;
+    const minorCateg = 3;
 
-  describe('id 유효성 검사', () => {
-    const category = 'category';
-    const validId = 10;
-    const ids = [null, -30, 40.5];
-    ids.forEach(id =>{
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(reservationService.reserve(category, id, validId, validId)).rejects.toThrow(`${id}는 입력할 수 없는 categoryId형식입니다.`);
-      });
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(reservationService.reserve(category, validId, id, validId)).rejects.toThrow(`${id}는 입력할 수 없는 itemId형식입니다.`);
-      });
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(reservationService.reserve(category, validId, validId, id)).rejects.toThrow(`${id}는 입력할 수 없는 userId형식입니다.`);
-      });
-      it('아이디에 양의 정수가 아닌 수가 들어갔을 때', async () => {
-        await expect(reservationService.book(id, category)).rejects.toThrow(`${id}는 입력할 수 없는 reservationId형식입니다.`);
-      });
-    });
+    const reservedEntity = new ReservationEntity(); // 이미 예약된 아이템
+
+    // 예약된 아이템이 존재한다고 가정하고 모킹
+    jest.spyOn(reservationRepository, 'reservedItem').mockResolvedValueOnce(reservedEntity);
+
+    // 이미 예약된 아이템이 있을 경우 에러가 발생하는지 테스트
+    await expect(reservationService.isAvailableItem(mainCateg, subCateg, minorCateg)).rejects.toThrow(
+      '이미 예약된 아이템입니다.'
+    );
   });
-
 });

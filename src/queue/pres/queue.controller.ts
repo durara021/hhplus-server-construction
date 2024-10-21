@@ -2,7 +2,6 @@ import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { QueuePostResponseDto, QueueGetResponseDto } from './dto';
 import { QueueUsecase } from '../app/queue.use-case';
-//import { SessionGuard } from '../../common/guard/session.guard';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('대기열 API') // 컨트롤러 태그 설정
@@ -23,17 +22,10 @@ export class QueueController {
     @Req() req:Request
   ): Promise<QueuePostResponseDto> {
 
-    const sessionData = req['sessionData'];
-    if (!sessionData || !sessionData.userId || !sessionData.uuid) {
-      throw new Error('Invalid session data');
-    }
+    const userId = req['userId'];
+    const uuid = req.cookies['sessionId'].uuid;
 
-    const userId: string = sessionData.userId;
-    const uuid: string = sessionData.uuid;
-    
     const enterResult = await this.QueueUsecase.enter(parseInt(userId), uuid);
-    sessionData.myPosition = enterResult.position;
-    sessionData.status = enterResult.status;
     
     return enterResult;
   }
@@ -49,17 +41,9 @@ export class QueueController {
     @Req() req:Request
   ): Promise<QueueGetResponseDto> {
 
-    const sessionData = req['sessionData'];
-    if (!sessionData || !sessionData.userId || !sessionData.uuid) {
-      throw new Error('Invalid session data');
-    }
-
-    const userId: string = sessionData.userId;
+    const userId = req['userId'];
 
     const myPosition = await this.QueueUsecase.myPosition(parseInt(userId));
-
-    sessionData.myPosition = myPosition.position;
-    sessionData.status = myPosition.status;
 
     return myPosition;
     

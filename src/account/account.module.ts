@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AccountService } from './app/account.service';
+import { AccountService } from './domain/account.service';
 import { AccountController } from './pres/account.controller';
 import { AbstractAccountService } from './domain/service.interfaces';
 import { TypeOrmModule } from '@nestjs/typeorm';

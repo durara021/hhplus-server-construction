@@ -19,24 +19,32 @@ export class QueueRepository implements AbstractQueueRepository{
     this.autoManagerRepository = new AutoManagerRepository(this.repository, this.entityManager);
   }
 
-  async enter(queueEntity: QueueEntity): Promise<{position:number, status: string}> {
+  async myQueueInfo(queueEntity: QueueEntity): Promise<QueueEntity | null>{
+    return await this.autoManagerRepository.proxyInstance.findOne({
+      where: {userId: queueEntity.userId}
+    });
+  }
+
+  async enter(queueEntity: QueueEntity): Promise<QueueEntity> {
     const result = await this.autoManagerRepository.proxyInstance.save(queueEntity);
-    return this.myPosition(result);
+    return result;
   }
 
   // 특정 사용자의 앞에 있는 대기열 사용자 수 계산
-  async myPosition(queueEntity: QueueEntity): Promise<{position:number, status: string}> {
-    const user = await this.autoManagerRepository.proxyInstance.findOne({ where: { userId: queueEntity.userId } });
-    if (!user) {
-      throw new NotFoundException('유저를 찾을 수 없습니다.');
-    }
+  async lastActiveUser(): Promise<QueueEntity | null> {
+    return await this.autoManagerRepository.proxyInstance.findOne({
+      where: { status: 'active' },
+      order: { id: 'DESC' },
+    });
+  }
 
-    const myPosition = await this.autoManagerRepository.proxyInstance.createQueryBuilder('queue')
-      .where('queue.id < :id', { id: user.id })
-      .andWhere('queue.status = :status', { status: user.status })
-      .getCount();
+  async expire(queueEntity: QueueEntity): Promise<QueueEntity> {
+    await this.autoManagerRepository.proxyInstance.update(
+      { userId: queueEntity.userId },
+      { status: queueEntity.status }
+    );
 
-    return {position: myPosition + 1, status: user.status};
+    return this.autoManagerRepository.proxyInstance.findOne({where: { userId : queueEntity.userId }});
   }
 
 }

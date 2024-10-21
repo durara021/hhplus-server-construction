@@ -8,13 +8,13 @@ export class ReservationEntity {
   id: number;  // 자동 증가로 대기열 순번 역할 수행
 
   @Column()
-  category: string;  // 예약 종류
+  mainCateg: number; // 예약 종류( 콘서트, 숙박 등 id )
 
   @Column()
-  categoryId: number; // 예약종류 대분류id(ex 콘서트 - 콘서트 planId, 숙박 - 숙박 업소id)
+  subCateg: number; // 예약 종류( 콘서트 일정, 숙박시설 등 id )
 
   @Column()
-  itemId: number // 해당 예약별 객체id(ex 콘서트 - 티켓id, 숙박 - 호실)
+  minorCateg: number // 예약 종류( 콘서트 자리, 숙박시설 호실 등 id)
 
   @Column()
   userId: number; // 예약자 id

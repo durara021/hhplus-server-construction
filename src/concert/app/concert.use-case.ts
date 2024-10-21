@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ConcertGetResponseDto as ResGetDto } from "../pres/dto";
 import { AbstractConcertService } from '../domain/service.interfaces/concert.service';
 import { DataSource } from 'typeorm';
+import { AbstractReservationService } from '../../reservation/domain/service.interfaces';
 
 @Injectable()
 export class ConcertUsecase {
 
     constructor(
         private readonly concertService: AbstractConcertService,
+        private readonly reservationService: AbstractReservationService,
         private readonly dataSource: DataSource
     ) {}
 
@@ -17,7 +19,7 @@ export class ConcertUsecase {
             const concerInfo = await this.concertService.concertInfo(concertId);
             
             //콘서트 예약가능일 조회
-            const concertPlans = await this.concertService.concertPlans(concerInfo.id);
+            const concertPlans = await this.concertService.concertPlanInfos(concerInfo.id);
             return new ResGetDto(concerInfo.title, null, concertPlans, null );
         });
     }
@@ -29,7 +31,7 @@ export class ConcertUsecase {
             const concertPlanInfo = await this.concertService.concertPlanInfo(concertPlanId);
 
             //콘서트 일정의 예약 가능한 자리 조회
-            const concertSeats = await this.concertService.availableSeats(concertPlanId, concertPlanInfo.capacity);
+            const concertSeats = await this.reservationService.availableItems(1, concertPlanId, concertPlanInfo.capacity);
 
             return new ResGetDto(null, concertPlanInfo.concertDate, null, concertSeats);
         });
