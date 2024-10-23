@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ConcertGetResponseDto as ResGetDto } from "../pres/dto";
-import { AbstractConcertService } from '../domain/service.interfaces/concert.service';
 import { DataSource } from 'typeorm';
+import { ConcertGetResponseDto as ResGetDto } from "../pres/dto";
+import { AbstractConcertService } from '../domain/service.interfaces';
 import { AbstractReservationService } from '../../reservation/domain/service.interfaces';
+import { ConcertRequestCommand } from './commands'; 
+import { ConcertRequestModel } from '../domain/models';
+import { ObjectMapper } from '../../common/mapper/object-mapper';
+import { ReservationRequestModel } from '../../reservation/domain/models';
 
 @Injectable()
 export class ConcertUsecase {
@@ -10,30 +14,40 @@ export class ConcertUsecase {
     constructor(
         private readonly concertService: AbstractConcertService,
         private readonly reservationService: AbstractReservationService,
-        private readonly dataSource: DataSource
+        private readonly objectMapper: ObjectMapper,
+        private readonly dataSource: DataSource,
     ) {}
 
-    //콘서트 정보 조회
-    async concertDates(concertId: number): Promise<ResGetDto> {
+    //콘서트 예약가능일 조회
+    async dates(command: ConcertRequestCommand): Promise<ResGetDto> {
         return await this.dataSource.transaction(async () => {
-            const concerInfo = await this.concertService.concertInfo(concertId);
+            //콘서트 정보 조회
+            const info = await this.concertService.info(this.objectMapper.mapObject(command, ConcertRequestModel));
             
             //콘서트 예약가능일 조회
-            const concertPlans = await this.concertService.concertPlanInfos(concerInfo.id);
-            return new ResGetDto(concerInfo.title, null, concertPlans, null );
+            const plans = await this.concertService.planInfos(this.objectMapper.mapObject(info, ConcertRequestModel));
+
+            return this.objectMapper.mapObject(plans, ResGetDto);
         });
     }
 
-    //콘서트 좌석 조회
-    async concertSeats(concertPlanId: number): Promise<ResGetDto> {
+    //콘서트 예약가능좌석 조회
+    async seats(command: ConcertRequestCommand): Promise<ResGetDto> {
         return await this.dataSource.transaction(async () => {
             //콘서트 일정 조회
-            const concertPlanInfo = await this.concertService.concertPlanInfo(concertPlanId);
+            const planInfo = await this.concertService.planInfo(this.objectMapper.mapObject(command, ConcertRequestModel));
 
             //콘서트 일정의 예약 가능한 자리 조회
-            const concertSeats = await this.reservationService.availableItems(1, concertPlanId, concertPlanInfo.capacity);
+            const reserveReqMod = new ReservationRequestModel();
+            reserveReqMod.mainCateg = 1;
+            reserveReqMod.subCateg = planInfo.id;
+            
+            const seats = (await this.reservationService.reservedItems(reserveReqMod)).map(seat => seat.minorCateg);
+            const concertModel = this.objectMapper.mapObject(planInfo, ConcertRequestModel);
+            concertModel.updateSeats(seats);
+            const availableSeats = await this.concertService.availableSeats(concertModel);
 
-            return new ResGetDto(null, concertPlanInfo.concertDate, null, concertSeats);
+            return this.objectMapper.mapObject(availableSeats, ResGetDto);
         });
     }
 }

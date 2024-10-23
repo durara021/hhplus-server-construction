@@ -1,11 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { PaymentEntity } from "../entities";
+import { PaymentRequestModel } from "../models";
+import { PaymentResponseCommand } from "../../app/commands";
 
 interface PaymentServiceInterface{
-    record(userId: number, price:number): Promise<PaymentEntity>
+    record(model: PaymentRequestModel): Promise<PaymentResponseCommand>
 }
 
 @Injectable()
 export abstract class AbstractPaymentService implements PaymentServiceInterface{
-    abstract record(userId: number, price: number): Promise<PaymentEntity>
+    abstract record(model: PaymentRequestModel): Promise<PaymentResponseCommand>
 }

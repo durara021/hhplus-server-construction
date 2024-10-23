@@ -1,15 +1,17 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { ObjectMapper } from 'src/common/mapper/object-mapper';
 import { AccountUsecase } from '../app/account.use-case';
-import { AccountGetResponseDto, AccountPostResponseDto } from './dto';
+import { AccountGetResponseDto, AccountPatchRequestDto, AccountPostResponseDto } from './dto';
 import { ApiBody, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
-//import { UserValidationGuard } from '../../common/guard/user-validation.guard';
+import { AccountCommand } from '../app/commands/account.request.command';
 
 @ApiTags('계좌 API') 
 @Controller('accounts')
 export class AccountController {
   
   constructor(
-    private readonly accountUsecase: AccountUsecase
+    private readonly accountUsecase: AccountUsecase,
+    private readonly objectMapper: ObjectMapper,
   ) {}
 
 
@@ -21,14 +23,10 @@ export class AccountController {
     description: '성공',
     type: AccountPostResponseDto,
   })
-  //@UseGuards(UserValidationGuard)
   charge(
-    @Param('userId') userId: string,
-    @Body('amount') amount: string,
+    @Body() body: AccountPatchRequestDto,
   ): Promise<AccountPostResponseDto> {
-    const chargeResult = this.accountUsecase.charge(parseInt(userId), parseInt(amount))
-    return chargeResult;
-    
+    return this.accountUsecase.charge(this.objectMapper.mapObject(body, AccountCommand));
   }
 
   @Get('/:userId/points')
@@ -38,11 +36,10 @@ export class AccountController {
     description: '성공',
     type: AccountGetResponseDto,
   })
-  //@UseGuards(UserValidationGuard)
   point(
-    @Param('userId') userId: string,
+    @Body() body: AccountPatchRequestDto,
   ): Promise<AccountGetResponseDto> {
-    return this.accountUsecase.point(parseInt(userId));
+    return this.accountUsecase.point(this.objectMapper.mapObject(body, AccountCommand));
   }
 
 }

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AbstractReservationService } from '../reservation/domain/service.interfaces'; 
 import { ReservationService } from '../reservation/domain/reservation.service';
 import { AbstractReservationRepository } from '../reservation/domain/repository.interfaces';
-import { ReservationEntity } from '../reservation/domain/entities';
+import { ReservationEntity } from '../reservation/infra/entities';
 
 
 describe('ReservationService - isAvailableItem', () => {
@@ -12,7 +12,7 @@ describe('ReservationService - isAvailableItem', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ReservationService,
+        { provide: AbstractReservationService, useClass: ReservationService},
         {
           provide: AbstractReservationRepository,
           useValue: {
@@ -22,7 +22,7 @@ describe('ReservationService - isAvailableItem', () => {
       ],
     }).compile();
 
-    reservationService = module.get<ReservationService>(ReservationService);
+    reservationService = module.get<AbstractReservationService>(AbstractReservationService);
     reservationRepository = module.get<AbstractReservationRepository>(AbstractReservationRepository);
   });
 

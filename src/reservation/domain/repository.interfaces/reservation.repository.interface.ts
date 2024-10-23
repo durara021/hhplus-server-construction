@@ -1,21 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import { ReservationEntity } from "../entities/reservation.entity";
-
+import { ReservationRequestEntity as ReservationEntity } from "../../infra/entities";
+import { ReservationResponseCommand } from "../../app/commands";
 interface ReservationRepositoryInterface{
-    reserve(reservationEntity: ReservationEntity): Promise<ReservationEntity>
-    reservedItems(reservatioEntity: ReservationEntity): Promise<ReservationEntity[]>
-    reservedItem(reservatioEntity: ReservationEntity): Promise<ReservationEntity>
-    statusUpdate(reservationEntity: ReservationEntity): Promise<ReservationEntity>
-    statusesUpdate(reservationId: number[], status: string): Promise<number>
-    itemsByStatus(reservationEntity: ReservationEntity): Promise<ReservationEntity[]>
+    reserve(reservationEntity: ReservationEntity): Promise<ReservationResponseCommand>
+    reservedItems(reservatioEntity: ReservationEntity): Promise<ReservationResponseCommand[]>
+    reservedItem(reservatioEntity: ReservationEntity): Promise<ReservationResponseCommand>
+    statusUpdate(reservationEntity: ReservationEntity): Promise<ReservationResponseCommand>
+    statusesUpdate(reservationEntity: ReservationEntity): Promise<void>
+    itemsByStatus(reservationEntity: ReservationEntity): Promise<ReservationResponseCommand[]>
 }
 
 @Injectable()
 export abstract class AbstractReservationRepository implements ReservationRepositoryInterface{
-    abstract reserve(reservationEntity: ReservationEntity): Promise<ReservationEntity>
-    abstract reservedItems(reservatioEntity: ReservationEntity): Promise<ReservationEntity[]>
-    abstract reservedItem(reservatioEntity: ReservationEntity): Promise<ReservationEntity>
-    abstract statusUpdate(reservationEntity: ReservationEntity): Promise<ReservationEntity>
-    abstract statusesUpdate(reservationId: number[], status: string): Promise<number>
-    abstract itemsByStatus(reservationEntity: ReservationEntity): Promise<ReservationEntity[]>
+    abstract reserve(reservationEntity: ReservationEntity): Promise<ReservationResponseCommand>
+    abstract reservedItems(reservatioEntity: ReservationEntity): Promise<ReservationResponseCommand[]>
+    abstract reservedItem(reservatioEntity: ReservationEntity): Promise<ReservationResponseCommand>
+    abstract statusUpdate(reservationEntity: ReservationEntity): Promise<ReservationResponseCommand>
+    abstract statusesUpdate(reservationEntity: ReservationEntity): Promise<void>
+    abstract itemsByStatus(reservationEntity: ReservationEntity): Promise<ReservationResponseCommand[]>
 }

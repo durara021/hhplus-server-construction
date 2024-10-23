@@ -1,24 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class ConcertGetResponseDto {
-    @ApiProperty({ description: '공연 이름' })
-    title: string | null;
+    @ApiProperty({ description: '공연 번호' })
+    id: number;
+    @ApiProperty({ description: '공연일정 번호' })
+    concertPlanId: number;
     @ApiProperty({ description: '공연 날짜' })
-    concertDate: Date;
+    concertDate?: Date;
     @ApiProperty({ description: '공연 예약 가능 날짜' })
-    availableDates: Date[] | null;
+    concertDates?: Date[] | null;
     @ApiProperty({ description: '예약 가능 좌석' })
-    availableSeats: number[] | null;
-
-    constructor(
-        title: string,
-        concertDate: Date,
-        availableDates: Date[] | null,
-        availableSeats: number[] | null,
-    ) {
-        this.title = title;
-        this.concertDate = concertDate;
-        this.availableDates = availableDates;
-        this.availableSeats = availableSeats;
-    }
+    concertSeats?: number[] | null;
 }

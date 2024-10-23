@@ -5,12 +5,4 @@ export class QueueGetResponseDto {
     position: number;
     @ApiProperty({ description: '상태' })
     status: string;
-
-    constructor(
-        position: number,
-        status: string,
-    ) {
-        this.position = position;
-        this.status = status;
-    }
 }

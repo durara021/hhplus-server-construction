@@ -1,14 +1,16 @@
-import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
-import { QueuePostResponseDto, QueueGetResponseDto } from './dto';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { QueuePostResponseDto, QueueGetResponseDto, QueueGetRequestDto } from './dto';
+import { QueueRequestCommand } from '../app/commands';
 import { QueueUsecase } from '../app/queue.use-case';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ObjectMapper } from 'src/common/mapper/object-mapper';
 
 @ApiTags('대기열 API') // 컨트롤러 태그 설정
 @Controller('queues')
 export class QueueController {
   constructor(
-    private readonly QueueUsecase: QueueUsecase
+    private readonly QueueUsecase: QueueUsecase,
+    private readonly objectMapper: ObjectMapper,
   ) {}
 
   @Post('')
@@ -19,15 +21,9 @@ export class QueueController {
   })
   //@UseGuards(SessionGuard)
   async enter(
-    @Req() req:Request
+    @Body() body: QueuePostResponseDto
   ): Promise<QueuePostResponseDto> {
-
-    const userId = req['userId'];
-    const uuid = req.cookies['sessionId'].uuid;
-
-    const enterResult = await this.QueueUsecase.enter(parseInt(userId), uuid);
-    
-    return enterResult;
+    return await this.QueueUsecase.enter(this.objectMapper.mapObject(body, QueueRequestCommand));
   }
 
   @Get('/positions')
@@ -38,15 +34,8 @@ export class QueueController {
   })
   //@UseGuards(SessionGuard)
   async myPosition(
-    @Req() req:Request
+    @Body() body: QueueGetRequestDto
   ): Promise<QueueGetResponseDto> {
-
-    const userId = req['userId'];
-
-    const myPosition = await this.QueueUsecase.myPosition(parseInt(userId));
-
-    return myPosition;
-    
+    return await this.QueueUsecase.myPosition(this.objectMapper.mapObject(body, QueueRequestCommand));
   }
-
 }

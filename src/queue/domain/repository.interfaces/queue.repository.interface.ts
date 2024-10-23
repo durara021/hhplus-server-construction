@@ -1,18 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { QueueEntity } from "../entities/queue.entity";
+import { QueueEntity } from "../../infra/repositories/entities/queue.entity";
+import { QueueResponseModel } from "../models";
 
 
 interface QueueRepositoryInterface{
-    enter(queueEntity: QueueEntity): Promise<QueueEntity>
-    lastActiveUser(): Promise<QueueEntity>
-    expire(queueEntity: QueueEntity): Promise<QueueEntity>
-    myQueueInfo(queueEntity: QueueEntity): Promise<QueueEntity>
+    enter(queueEntity: QueueEntity): Promise<QueueResponseModel>
+    lastActiveUser(): Promise<QueueResponseModel>
+    expire(queueEntity: QueueEntity): Promise<QueueResponseModel>
+    myQueueInfo(queueEntity: QueueEntity): Promise<QueueResponseModel>
 }
 
 @Injectable()
 export abstract class AbstractQueueRepository implements QueueRepositoryInterface{
-    abstract enter(queueEntity: QueueEntity): Promise<QueueEntity>
-    abstract lastActiveUser(): Promise<QueueEntity>
-    abstract expire(queueEntity: QueueEntity): Promise<QueueEntity>
-    abstract myQueueInfo(queueEntity: QueueEntity): Promise<QueueEntity>
+    abstract enter(queueEntity: QueueEntity): Promise<QueueResponseModel>
+    abstract lastActiveUser(): Promise<QueueResponseModel>
+    abstract expire(queueEntity: QueueEntity): Promise<QueueResponseModel>
+    abstract myQueueInfo(queueEntity: QueueEntity): Promise<QueueResponseModel>
 }

@@ -6,11 +6,11 @@ import { AbstractReservationService } from './domain/service.interfaces';
 import { AbstractReservationRepository } from './domain/repository.interfaces';
 import { ReservationRepository } from './infra/repositories/reservation.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ReservationEntity } from './domain/entities';
+import { ReservationResponseEntity } from './infra/entities';
 import { ReservationUsecase } from './app/reservation.use-case';
 
 @Module({
-  imports: [ TypeOrmModule.forFeature([ReservationEntity]), ConcertModule ],
+  imports: [ TypeOrmModule.forFeature([ReservationResponseEntity]), ConcertModule ],
   controllers: [ ReservationController ],
   providers: [
     ReservationUsecase,

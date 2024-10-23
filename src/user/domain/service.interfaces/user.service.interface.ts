@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity } from '../entity.interfaces';
+import { UserEntity } from '../../infra/entity.interfaces';
 
 interface UserServiceInterface {
   user(userId: number): Promise<UserEntity>

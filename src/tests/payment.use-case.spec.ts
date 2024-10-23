@@ -72,7 +72,7 @@ describe('PaymentUsecase', () => {
     (accountService.point as jest.Mock).mockResolvedValue(beforeBalance);
     (accountService.use as jest.Mock).mockResolvedValue(updatedBalance);
     (accountService.update as jest.Mock).mockResolvedValue(undefined);
-    (reservationService.book as jest.Mock).mockResolvedValue(undefined);
+    (reservationService. as jest.Mock).mockResolvedValue(undefined);
     (paymentService.record as jest.Mock).mockResolvedValue(paymentRecord);
     (queueService.expire as jest.Mock).mockResolvedValue(undefined);
 

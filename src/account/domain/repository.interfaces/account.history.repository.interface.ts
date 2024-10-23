@@ -1,13 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { AccountHistoryEntity } from "../entities";
+import { AccountHistoryEntity } from "../../infra/entities";
+import { AccountResponseModel } from "../models";
 
 interface AccountRepositoryHistoryInterface{
-    record(accountHistoryEntity: AccountHistoryEntity): Promise<AccountHistoryEntity>;
-    history(accountHistoryEntity: AccountHistoryEntity): Promise<AccountHistoryEntity[]>;
+    record(accountHistoryEntity: AccountHistoryEntity): Promise<AccountResponseModel>;
+    history(accountHistoryEntity: AccountHistoryEntity): Promise<AccountResponseModel[]>;
 }
 
 @Injectable()
 export abstract class AbstractAccountHistoryRepository implements AccountRepositoryHistoryInterface{
-    abstract record(accountHistoryEntity: AccountHistoryEntity): Promise<AccountHistoryEntity>;
-    abstract history(accountHistoryEntity: AccountHistoryEntity): Promise<AccountHistoryEntity[]>;
+    abstract record(accountHistoryEntity: AccountHistoryEntity): Promise<AccountResponseModel>;
+    abstract history(accountHistoryEntity: AccountHistoryEntity): Promise<AccountResponseModel[]>;
 }

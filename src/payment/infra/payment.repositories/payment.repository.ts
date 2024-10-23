@@ -4,6 +4,8 @@ import { Injectable } from "@nestjs/common";
 import { AbstractPaymentRepository } from "../../domain/repository.interfaces";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AutoManagerRepository } from "../../../common/utils/auto-manager.repository";
+import { PaymentResponseModel } from "../../domain/models";
+import { ObjectMapper } from "../../../common/mapper/object-mapper";
 
 @Injectable()
 export class PaymentRepository implements AbstractPaymentRepository {
@@ -13,6 +15,7 @@ export class PaymentRepository implements AbstractPaymentRepository {
   constructor(
     @InjectRepository(PaymentEntity)
     private readonly repository: Repository<PaymentEntity>,
+    private readonly objectMapper: ObjectMapper,
     private readonly entityManager?: EntityManager,
   ) {
     // AutoManagerRepository 인스턴스 생성
@@ -20,7 +23,7 @@ export class PaymentRepository implements AbstractPaymentRepository {
   }
 
   async record(paymentEntity: PaymentEntity): Promise<PaymentEntity> {
-    return this.autoManagerRepository.proxyInstance.save(paymentEntity);
+    return this.objectMapper.mapObject((await this.autoManagerRepository.proxyInstance.save(paymentEntity)), PaymentResponseModel);
   }
   
 }

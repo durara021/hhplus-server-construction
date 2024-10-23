@@ -1,21 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { ReservationEntity } from '../entities';
+import { ReservationResponseCommand } from '../../app/commands';
+import { ReservationRequestModel } from '../models';
 
 interface ReservationServiceInterface {
-  reserve(mainCateg: number, subCateg:number, minorCateg: number, userId:number): Promise<ReservationEntity>
-  statusUpdate(reservationId:number, status:string): Promise<ReservationEntity>
-  statusesUpdate(reservationEntities: ReservationEntity[]): Promise<number>
-  availableItems(mainCateg: number, subCateg:number, capacity: number): Promise<number[]>
-  isAvailableItem(mainCateg: number, subCateg:number, minorCateg: number): Promise<ReservationEntity>
-  itemsByStatus(status: string): Promise<ReservationEntity[]>
+  reserve(model: ReservationRequestModel): Promise<ReservationResponseCommand>
+  statusUpdate(model: ReservationRequestModel): Promise<ReservationResponseCommand>
+  statusesUpdate(model: ReservationRequestModel): Promise<void>
+  reservedItems(model: ReservationRequestModel): Promise<ReservationResponseCommand[]>
+  isAvailableItem(model: ReservationRequestModel): Promise<ReservationResponseCommand>
+  itemsByStatus(model: ReservationRequestModel): Promise<ReservationResponseCommand[]>
 }
 
 @Injectable()
 export abstract class AbstractReservationService implements ReservationServiceInterface {
-  abstract reserve(mainCateg: number, subCateg:number, minorCateg: number, userId:number): Promise<ReservationEntity>
-  abstract statusUpdate(reservationId:number, status:string): Promise<ReservationEntity>
-  abstract statusesUpdate(reservationEntities: ReservationEntity[]): Promise<number>
-  abstract availableItems(mainCateg: number, subCateg:number, capacity: number): Promise<number[]>
-  abstract isAvailableItem(mainCateg: number, subCateg:number, minorCateg: number): Promise<ReservationEntity>
-  abstract itemsByStatus(status: string): Promise<ReservationEntity[]>
+  abstract reserve(model: ReservationRequestModel): Promise<ReservationResponseCommand>
+  abstract statusUpdate(model: ReservationRequestModel): Promise<ReservationResponseCommand>
+  abstract statusesUpdate(model: ReservationRequestModel): Promise<void>
+  abstract reservedItems(model: ReservationRequestModel): Promise<ReservationResponseCommand[]>
+  abstract isAvailableItem(model: ReservationRequestModel): Promise<ReservationResponseCommand>
+  abstract itemsByStatus(model: ReservationRequestModel): Promise<ReservationResponseCommand[]>
 }

@@ -1,14 +1,17 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
 import { ReservationUsecase } from '../app/reservation.use-case';
-import { ReservationPostResponseDto as ResPostDto} from './dto';
+import { ReservationPostRequestDto, ReservationPostResponseDto as ResPostDto} from './dto';
+import { ReservationRequestCommand } from '../app/commands';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ObjectMapper } from 'src/common/mapper/object-mapper';
 
 @ApiTags('예약 API') // 컨트롤러 태그 설정
 @Controller('reservations')
 export class ReservationController {
   
   constructor(
-    private readonly reservationUsecase: ReservationUsecase
+    private readonly reservationUsecase: ReservationUsecase,
+    private readonly objectMapper: ObjectMapper
   ) {}
 
   @Post('')
@@ -18,12 +21,9 @@ export class ReservationController {
     type: ResPostDto,
   })
   reserve(
-    @Body('userId') userId: string,
-    @Body('category') category: string,
-    @Body('categoryId') categoryId: string,
-    @Body('itemId') itemId: string,
+    @Body() body: ReservationPostRequestDto
   ): Promise<ResPostDto> {
-    return this.reservationUsecase.reserve(category, parseInt(categoryId), parseInt(itemId), parseInt(userId));
+    return this.reservationUsecase.reserve(this.objectMapper.mapObject(body, ReservationRequestCommand));
   }
 
 }

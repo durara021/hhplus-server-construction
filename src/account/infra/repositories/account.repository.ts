@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { EntityManager, Repository } from "typeorm";
-import { AccountEntity } from "../../domain/entities/account.entity";
+import { AccountEntity } from "../entities/account.entity";
 import { AbstractAccountRepository } from "../../domain/repository.interfaces";
 import { AutoManagerRepository } from "../../../common/utils/auto-manager.repository";
+import { AccountResponseModel } from "src/account/domain/models";
+import { ObjectMapper } from "src/common/mapper/object-mapper";
 
 @Injectable()
 export class AccountRepository implements AbstractAccountRepository {
@@ -12,6 +14,7 @@ export class AccountRepository implements AbstractAccountRepository {
 
   constructor(
     @InjectRepository(AccountEntity)
+    private readonly objectMapper: ObjectMapper,
     private readonly repository: Repository<AccountEntity>,
     private readonly entityManager?: EntityManager,
   ) {
@@ -19,16 +22,16 @@ export class AccountRepository implements AbstractAccountRepository {
     this.autoManagerRepository = new AutoManagerRepository(this.repository, this.entityManager);
   }
 
-  async update(accountEntity: AccountEntity): Promise<AccountEntity> {
+  async update(accountEntity: AccountEntity): Promise<AccountResponseModel> {
     await this.autoManagerRepository.proxyInstance.update(
       {userId: accountEntity.userId},
       {balance: accountEntity.balance}
     );
 
-    return await this.autoManagerRepository.proxyInstance.findOne({where: {userId: accountEntity.userId}});
+    return this.objectMapper.mapObject((await this.autoManagerRepository.proxyInstance.findOne({where: {userId: accountEntity.userId}})), AccountResponseModel);
   }
 
-  async point(accountEntity:AccountEntity): Promise<AccountEntity> {
-    return await this.autoManagerRepository.proxyInstance.findOne({where : {userId: accountEntity.userId}});
+  async point(accountEntity:AccountEntity): Promise<AccountResponseModel> {
+    return this.objectMapper.mapObject((await this.autoManagerRepository.proxyInstance.findOne({where : {userId: accountEntity.userId}})), AccountResponseModel);
   }
 }

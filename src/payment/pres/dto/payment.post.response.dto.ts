@@ -7,13 +7,4 @@ export class PaymentPostResponseDto {
     reservationId: number;
     @ApiProperty({ description: '등록일' })
     regDate: Date;
-    constructor(
-        userId: number,
-        reservationId: number,
-        regDate: Date,
-    ) {
-        this.userId = userId;
-        this.reservationId = reservationId;
-        this.regDate = regDate;
-    }
 }

@@ -17,7 +17,6 @@ export class SessionGuard implements CanActivate {
       // 세션 ID가 있는지 확인
       if (sessionId) {
         const session = await this.sessionService.session(sessionId.uuid);
-        
 
         const sessionDuration = 1000 * 60 * 60;
         const currentTime = Date.now();
@@ -25,7 +24,7 @@ export class SessionGuard implements CanActivate {
           this.sessionService.expire(session.uuid);
           throw new UnauthorizedException('세션이 만료되었습니다.');
         } else {
-          req['userId'] = session.userId; // userId를 요청 객체에 추가
+          req.body['userId'] = session.userId; // userId를 요청의 body에 추가
         }
       } else {
         throw new UnauthorizedException('세션이 없습니다.00');

@@ -1,21 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { AccountEntity, AccountHistoryEntity } from '../entities';
+import { AccountRequestModel } from '../models';
+import { AccountResponseCommand } from 'src/account/app/commands/account.response.command';
 
 interface AccountServiceInterface {
-  update(userId: number, balance:number): Promise<AccountEntity>
-  use(balance: number, point:number): Promise<number>
-  charge(balance: number, point:number): Promise<number>
-  point(userId:number): Promise<AccountEntity> 
-  record(userId:number, amount:number, stat: string): Promise<AccountHistoryEntity>
-  history(userId: number): Promise<AccountHistoryEntity[]> 
+  update(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  use(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  charge(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  point(accountModel: AccountRequestModel): Promise<AccountResponseCommand> 
+  record(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  history(accountModel: AccountRequestModel): Promise<AccountResponseCommand[]> 
 }
 
 @Injectable()
 export abstract class AbstractAccountService implements AccountServiceInterface {
-  abstract update(userId: number, balance:number): Promise<AccountEntity>
-  abstract use(balance: number, point:number): Promise<number>
-  abstract charge(balance: number, point:number): Promise<number>
-  abstract point(userId:number): Promise<AccountEntity> 
-  abstract record(userId:number, amount:number, stat: string): Promise<AccountHistoryEntity>
-  abstract history(userId: number): Promise<AccountHistoryEntity[]> 
+  abstract update(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  abstract use(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  abstract charge(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  abstract point(accountModel: AccountRequestModel): Promise<AccountResponseCommand> 
+  abstract record(accountModel: AccountRequestModel): Promise<AccountResponseCommand>
+  abstract history(accountModel: AccountRequestModel): Promise<AccountResponseCommand[]> 
 }

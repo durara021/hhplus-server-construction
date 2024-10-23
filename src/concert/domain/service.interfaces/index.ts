@@ -1,1 +1,1 @@
-export * from './concert.service';
+export * from './concert.service.interface';

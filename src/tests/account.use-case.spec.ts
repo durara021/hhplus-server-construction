@@ -3,7 +3,7 @@ import { AccountUsecase } from '../account/app/account.use-case';
 import { AbstractAccountService } from '../account/domain/service.interfaces/account.service.interface';
 import { DataSource } from 'typeorm';
 import { AccountPostResponseDto as ResPostDto } from '../account/pres/dto';
-import { AccountHistoryEntity } from '../account/domain/entities';
+import { AccountHistoryEntity } from '../account/infra/entities';
 
 describe('AccountUsecase - charge', () => {
   let accountUsecase: AccountUsecase;

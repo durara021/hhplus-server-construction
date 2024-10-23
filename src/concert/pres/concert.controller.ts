@@ -2,13 +2,17 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { ConcertUsecase } from '../app/concert.use-case';
 import { ConcertGetResponseDto as ResGetDto } from './dto';
 import { ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ConcertGetRequestDto } from './dto/concert.get.request.dto';
+import { ObjectMapper } from 'src/common/mapper/object-mapper';
+import { ConcertRequestCommand } from '../app/commands/concert.request.command';
 
 @ApiTags('콘서트 API')
 @Controller('concerts')
 export class ConcertController {
   
   constructor(
-    private readonly concertUsecase: ConcertUsecase
+    private readonly concertUsecase: ConcertUsecase,
+    private readonly objectMapper: ObjectMapper,
   ) {}
 
 
@@ -20,9 +24,9 @@ export class ConcertController {
     type: ResGetDto,
   })
   concertDates(
-    @Param('concertId') concertId: string
+    @Param() params: ConcertGetRequestDto
   ): Promise<ResGetDto> {
-    return this.concertUsecase.concertDates(parseInt(concertId));
+    return this.concertUsecase.dates(this.objectMapper.mapObject(params, ConcertRequestCommand));
   }
 
   @Get('/:concertId/dates/:date/seats')
@@ -34,10 +38,9 @@ export class ConcertController {
     type: ResGetDto,
   })
   concertSeats(
-    @Param('concertId') concertId: string,
-    @Param('concertDate') concertDate: string,
+    @Param() params: ConcertGetRequestDto
   ): Promise<ResGetDto> {
-    return this.concertUsecase.concertSeats(parseInt(concertId));
+    return this.concertUsecase.seats(this.objectMapper.mapObject(params, ConcertRequestCommand));
   }
 
 }

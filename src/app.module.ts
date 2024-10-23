@@ -5,7 +5,6 @@ import { ReservationModule } from './reservation/reservation.module';
 import { ConcertModule } from './concert/concert.module';
 import { PaymentModule } from './payment/payment.module';
 import { AccountModule } from './account/account.module';
-import { CustomEventEmitterService } from './common/event/custom-event-emitter.service';
 import { SessionModule } from './session/session.module';
 import { SessionService } from './session/domain/session.service';
 import { APP_GUARD } from '@nestjs/core';

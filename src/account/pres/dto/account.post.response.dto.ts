@@ -9,16 +9,4 @@ export class AccountPostResponseDto {
     stat: string; // 충전/사용 구분
     @ApiProperty({ description: '등록일' })
     regDate: Date; // 등록일
-
-    constructor(
-        userId: number,
-        amount: number,
-        stat: string,
-        regDate: Date,
-    ) {
-        this.userId = userId;
-        this.amount = amount;
-        this.stat = stat;      
-        this.regDate = regDate;
-    }
 } 

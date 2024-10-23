@@ -15,22 +15,4 @@ export class ReservationPostResponseDto {
     status: string;
     @ApiProperty({ description: '수정일' })
     modDate: Date | null;
-
-    constructor(
-        mainCateg: number,
-        subCateg: number,
-        minorCateg: number,
-        userId: number,
-        regDate: Date,
-        status: string,
-        modDate: Date | null,
-    ) {
-        this.mainCateg = mainCateg;
-        this.subCateg = subCateg;
-        this.minorCateg = minorCateg;
-        this.userId = userId;
-        this.regDate = regDate;
-        this.status = status;
-        this.modDate = modDate;
-    }
 }

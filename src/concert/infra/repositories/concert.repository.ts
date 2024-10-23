@@ -1,9 +1,11 @@
 import { EntityManager, Repository } from "typeorm";
-import { ConcertEntity } from "../../domain/entities/concert.entity";
+import { ConcertEntity } from "../entities/concert.entity";
 import { Injectable } from "@nestjs/common";
 import { AbstractConcertRepository } from "../../domain/repository.interfaces";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AutoManagerRepository } from "../../../common/utils/auto-manager.repository";
+import { ObjectMapper } from "src/common/mapper/object-mapper";
+import { ConcertResponseModel } from "src/concert/domain/models";
 
 @Injectable()
 export class ConcertRepository implements AbstractConcertRepository {
@@ -12,6 +14,7 @@ export class ConcertRepository implements AbstractConcertRepository {
 
   constructor(
     @InjectRepository(ConcertEntity)
+    private readonly objectMapper: ObjectMapper,
     private readonly repository: Repository<ConcertEntity>,
     private readonly entityManager?: EntityManager,
   ) {
@@ -19,8 +22,8 @@ export class ConcertRepository implements AbstractConcertRepository {
     this.autoManagerRepository = new AutoManagerRepository(this.repository, this.entityManager);
   }
 
-  async concertInfo(concertEntity:ConcertEntity): Promise<ConcertEntity | undefined> {
-    return await this.autoManagerRepository.proxyInstance.findOne({ where: { id: concertEntity.id } });
+  async info(concertEntity:ConcertEntity): Promise<ConcertResponseModel | undefined> {
+    return this.objectMapper.mapObject((await this.autoManagerRepository.proxyInstance.findOne({ where: { id: concertEntity.id } })), ConcertResponseModel);
   }
   
 }

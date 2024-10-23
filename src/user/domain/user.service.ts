@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserEntity } from './entity.interfaces';
+import { UserEntity } from '../infra/entity.interfaces';
 import { AbstractUserRepository } from './repository.interfaces';
 import { NotFoundError } from 'rxjs';
 
