@@ -3,7 +3,7 @@ import { ReservationUsecase } from '../app/reservation.use-case';
 import { ReservationPostRequestDto, ReservationPostResponseDto as ResPostDto} from './dto';
 import { ReservationRequestCommand } from '../app/commands';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ObjectMapper } from 'src/common/mapper/object-mapper';
+import { ObjectMapper } from '../../common/mapper/object-mapper';
 
 @ApiTags('예약 API') // 컨트롤러 태그 설정
 @Controller('reservations')

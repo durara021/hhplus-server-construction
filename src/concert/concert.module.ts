@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CommonModule } from '../common/common.module';
 import { ConcertService } from './domain/concert.service';
 import { AbstractConcertService } from './domain/service.interfaces';
 import { ConcertController } from './pres/concert.controller';
@@ -8,9 +9,10 @@ import { ConcertRepository } from './infra/repositories/concert.repository';
 import { ConcertPlanRepository } from './infra/repositories/concertPlan.repository';
 import { ConcertEntity, ConcertPlanEntity } from './infra/entities';
 import { ConcertUsecase } from './app/concert.use-case';
+import { ReservationModule } from '../reservation/reservation.module';
 
 @Module({
-  imports: [ TypeOrmModule.forFeature([ ConcertEntity, ConcertPlanEntity ])],
+  imports: [ TypeOrmModule.forFeature([ ConcertEntity, ConcertPlanEntity ]), forwardRef(() => ReservationModule), CommonModule ],
   controllers: [ConcertController],
   providers: [
     ConcertUsecase, 

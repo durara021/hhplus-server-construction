@@ -1,9 +1,9 @@
 export class AccountRequestModel {
-    readonly userId: number;
+    userId: number;
     balance: number;
-    amount?: number;
-    status?: string;
-    createdAt?: Date;
+    amount: number;
+    status: string;
+    createdAt: Date;
   
     updateAmount(newAmount: number): void {
       this.amount = newAmount;

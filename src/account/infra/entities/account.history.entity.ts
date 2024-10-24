@@ -15,6 +15,6 @@ export class AccountHistoryEntity {
   @Column()
   stat: string; // 충전/사용 구분
 
-  @Column({default: Date.now()})
+  @CreateDateColumn()
   regDate: Date; // 등록일
 }

@@ -1,33 +1,25 @@
-import { EntityManager, Repository } from "typeorm";
+import { EntityManager } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { AbstractConcertPlanRepository } from "../../domain/repository.interfaces";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConcertPlanEntity } from "../entities";
-import { AutoManagerRepository } from "../../../common/utils/auto-manager.repository";
-import { ObjectMapper } from "src/common/mapper/object-mapper";
-import { ConcertResponseModel } from "src/concert/domain/models";
+import { ObjectMapper } from "../../../common/mapper/object-mapper";
+import { ConcertResponseModel } from "../../../concert/domain/models";
 
 @Injectable()
 export class ConcertPlanRepository implements AbstractConcertPlanRepository {
 
-  private autoManagerRepository: AutoManagerRepository<ConcertPlanEntity>;
-
   constructor(
     @InjectRepository(ConcertPlanEntity)
     private readonly objectMapper: ObjectMapper,
-    private readonly repository: Repository<ConcertPlanEntity>,
-    private readonly entityManager?: EntityManager,
-  ) {
-    // AutoManagerRepository 인스턴스 생성
-    this.autoManagerRepository = new AutoManagerRepository(this.repository, this.entityManager);
+  ) {}
+
+  async planInfo(concertPlanEntity:ConcertPlanEntity, manager:EntityManager): Promise<ConcertResponseModel | null> {
+    return this.objectMapper.mapObject((await manager.findOne(ConcertPlanEntity, {where: { concertId: concertPlanEntity.concertId }})), ConcertResponseModel);
   }
 
-  async planInfo(concertPlanEntity:ConcertPlanEntity): Promise<ConcertResponseModel | null> {
-    return this.objectMapper.mapObject((await this.autoManagerRepository.proxyInstance.findOne({where: { concertId: concertPlanEntity.concertId }})), ConcertResponseModel);
-  }
-
-  async planInfos(concertPlanEntity:ConcertPlanEntity): Promise<ConcertResponseModel[]> {
-    return this.objectMapper.mapArray((await this.autoManagerRepository.proxyInstance.find({where: {concertId: concertPlanEntity.concertId}})), ConcertResponseModel);
+  async planInfos(concertPlanEntity:ConcertPlanEntity, manager:EntityManager): Promise<ConcertResponseModel[]> {
+    return this.objectMapper.mapArray((await manager.find(ConcertPlanEntity, {where: {concertId: concertPlanEntity.concertId}})), ConcertResponseModel);
   }
 
 }

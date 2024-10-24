@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, Unique } from 'typeorm';
 
-@Entity('concert')
-@Unique(['category','categoryId', 'itemId'])
-export class ReservationResponseEntity {
+@Entity('reservation')
+@Unique(['mainCateg','subCateg', 'minorCateg'])
+export class ReservationEntity {
 
   @PrimaryGeneratedColumn()
   id: number;  // 자동 증가로 대기열 순번 역할 수행

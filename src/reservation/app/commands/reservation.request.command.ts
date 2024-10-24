@@ -1,6 +1,6 @@
 export class ReservationRequestCommand {
+  mainCateg: number;
+  subCateg: number;
+  minorCateg: number;
   userId: number;
-  category: string;
-  categoryId: number;
-  itemId: number;
 }

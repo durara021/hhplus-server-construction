@@ -7,10 +7,10 @@ import { AccountEntity, AccountHistoryEntity } from './infra/entities';
 import { AbstractAccountHistoryRepository, AbstractAccountRepository } from './domain/repository.interfaces';
 import { AccountHistoryRepository, AccountRepository } from './infra/repositories';
 import { AccountUsecase } from './app/account.use-case';
-import { ObjectMapper } from 'src/common/mapper/object-mapper';
+import { CommonModule } from '../common/common.module';
 
 @Module({
-  imports: [ TypeOrmModule.forFeature([AccountEntity, AccountHistoryEntity]), ObjectMapper],
+  imports: [ TypeOrmModule.forFeature([AccountEntity, AccountHistoryEntity]), CommonModule ],
   controllers: [AccountController],
   providers: [
     AccountUsecase, 

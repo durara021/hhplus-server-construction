@@ -1,15 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { SessionEntity } from "../entities/session.entity";
+import { SessionEntity } from "../../infra/entities/session.entity";
+import { EntityManager } from "typeorm";
 
 interface SessionRepositoryInterface{
-    create(sessionEntity: SessionEntity): Promise<SessionEntity>;
-    session(sessionEntity: SessionEntity): Promise<SessionEntity>;
-    expire(sessionEntity: SessionEntity): Promise<SessionEntity>;
+    create(sessionEntity: SessionEntity, manager: EntityManager): Promise<SessionEntity>;
+    session(sessionEntity: SessionEntity, manager: EntityManager): Promise<SessionEntity>;
+    expire(sessionEntity: SessionEntity, manager: EntityManager): Promise<SessionEntity>;
 }
 
 @Injectable()
 export abstract class AbstractSessionRepository implements SessionRepositoryInterface{
-    abstract create(sessionEntity: SessionEntity): Promise<SessionEntity>
-    abstract session(sessionEntity: SessionEntity): Promise<SessionEntity>
-    abstract expire(sessionEntity: SessionEntity): Promise<SessionEntity>
+    abstract create(sessionEntity: SessionEntity, manager: EntityManager): Promise<SessionEntity>
+    abstract session(sessionEntity: SessionEntity, manager: EntityManager): Promise<SessionEntity>
+    abstract expire(sessionEntity: SessionEntity, manager: EntityManager): Promise<SessionEntity>
 }

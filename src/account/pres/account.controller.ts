@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { ObjectMapper } from 'src/common/mapper/object-mapper';
+import { ObjectMapper } from '../../common/mapper/object-mapper';
 import { AccountUsecase } from '../app/account.use-case';
 import { AccountGetResponseDto, AccountPatchRequestDto, AccountPostResponseDto } from './dto';
 import { ApiBody, ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';

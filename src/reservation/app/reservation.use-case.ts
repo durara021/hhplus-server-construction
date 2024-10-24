@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { ReservationPostResponseDto as ResPostDto } from "../pres/dto";
 import { AbstractReservationService } from '../domain/service.interfaces/reservation.service.interface';
 import { ReservationRequestCommand } from './commands';
@@ -17,12 +17,15 @@ export class ReservationUsecase {
 
     //임시 예약
     async reserve(command: ReservationRequestCommand): Promise<ResPostDto> {
-        return await this.dataSource.transaction(async () => {
+        return await this.dataSource.transaction(async (manager: EntityManager) => {
             //예약 가능 여부 확인
-            await this.reservationService.isAvailableItem(this.objectMapper.mapObject(command, ReservationRequestModel));
+            console.log("--------------------"+command.mainCateg);
+            console.log("--------------------"+command.subCateg);
+            console.log("--------------------"+command.minorCateg);
+            await this.reservationService.isAvailableItem(this.objectMapper.mapObject(command, ReservationRequestModel), manager);
 
             //임시 예약
-            const reserveResult = await this.reservationService.reserve(this.objectMapper.mapObject(command, ReservationRequestModel));
+            const reserveResult = await this.reservationService.reserve(this.objectMapper.mapObject(command, ReservationRequestModel), manager);
 
             return this.objectMapper.mapObject(reserveResult, ResPostDto);
         });

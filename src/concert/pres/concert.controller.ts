@@ -3,7 +3,7 @@ import { ConcertUsecase } from '../app/concert.use-case';
 import { ConcertGetResponseDto as ResGetDto } from './dto';
 import { ApiCreatedResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ConcertGetRequestDto } from './dto/concert.get.request.dto';
-import { ObjectMapper } from 'src/common/mapper/object-mapper';
+import { ObjectMapper } from '../../common/mapper/object-mapper';
 import { ConcertRequestCommand } from '../app/commands/concert.request.command';
 
 @ApiTags('콘서트 API')

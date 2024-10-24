@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { SessionEntity } from '../entities';
+import { SessionEntity } from '../../infra/entities';
+import { EntityManager } from 'typeorm';
 
 interface SessionServiceInterface{
-  create(userId: number): Promise<SessionEntity>
-  session(uuid: string): Promise<SessionEntity>
-  expire(uuid: string): Promise<SessionEntity>
+  create(userId: number, manager: EntityManager): Promise<SessionEntity>
+  session(uuid: string, manager: EntityManager): Promise<SessionEntity>
+  expire(uuid: string, manager: EntityManager): Promise<SessionEntity>
 }
 
 @Injectable()
-export abstract class AbstractSessionService{
-    abstract create(userId: number): Promise<SessionEntity>
-    abstract session(uuid: string): Promise<SessionEntity>
-    abstract expire(uuid: string): Promise<SessionEntity>
+export abstract class AbstractSessionService implements SessionServiceInterface{
+    abstract create(userId: number, manager: EntityManager): Promise<SessionEntity>
+    abstract session(uuid: string, manager: EntityManager): Promise<SessionEntity>
+    abstract expire(uuid: string, manager: EntityManager): Promise<SessionEntity>
 }

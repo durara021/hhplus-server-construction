@@ -1,7 +1,8 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { SessionEntity } from './entities';
+import { SessionEntity } from '../infra/entities';
 import { AbstractSessionRepository } from './repository.interfaces';
 import { AbstractSessionService } from './service.interfaces/session.service.interface';
+import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class SessionService implements AbstractSessionService{
@@ -19,29 +20,29 @@ export class SessionService implements AbstractSessionService{
   }
 
   //세션 생성
-  async create(userId: number): Promise<SessionEntity> {
+  async create(userId: number, manager: EntityManager): Promise<SessionEntity> {
     const sessionEntity:SessionEntity = new SessionEntity();
     sessionEntity.uuid = this.uuidv4();
     sessionEntity.userId = userId;
     
-    const session = this.sessionRepository.create(sessionEntity);
+    const session = this.sessionRepository.create(sessionEntity, manager);
     if(!session) throw new ConflictException('UUID가 중복되어 세션을 생성할 수 없습니다.');
     return session;
   }
 
-  async session(uuid: string): Promise<SessionEntity> {
+  async session(uuid: string, manager: EntityManager): Promise<SessionEntity> {
     const sessionEntity: SessionEntity = new SessionEntity();
     sessionEntity.uuid = uuid;
     sessionEntity.status = 'expired';
 
-    return this.sessionRepository.session(sessionEntity);
+    return this.sessionRepository.session(sessionEntity, manager);
   }
 
-  async expire(uuid: string): Promise<SessionEntity> {
+  async expire(uuid: string, manager: EntityManager): Promise<SessionEntity> {
     const sessionEntity: SessionEntity = new SessionEntity();
     sessionEntity.uuid = uuid;
     sessionEntity.status = 'expired';
 
-    return this.sessionRepository.expire(sessionEntity);
+    return this.sessionRepository.expire(sessionEntity, manager);
   }
 }

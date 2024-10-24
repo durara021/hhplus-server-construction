@@ -1,99 +1,82 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { QueueUsecase } from '../queue/app/queue.use-case';
-import { AbstractQueueService } from '../queue/domain/service.interfaces';
-import { DataSource, QueryRunner } from 'typeorm';
-import { QueuePostResponseDto as ResPostDto, QueueGetResponseDto as ResGetDto } from '../queue/pres/dto';
+import { NotFoundException, ConflictException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { ConcertUsecase } from '../concert/app/concert.use-case';
+import { AbstractConcertService } from '../concert/domain/service.interfaces';
+import { AbstractReservationService } from '../reservation/domain/service.interfaces';
+import { ConcertRequestCommand } from '../concert/app/commands';
+import { ReservationRequestCommand } from '../reservation/app/commands';
 
-describe('QueueUsecase', () => {
-  let queueUsecase: QueueUsecase;
-  let queueService: AbstractQueueService;
-  let dataSource: DataSource;
-  let queryRunner: QueryRunner;
+describe('ConcertUsecase', () => {
+  let concertUsecase: ConcertUsecase;
+  let mockConcertService: jest.Mocked<AbstractConcertService>;
+  let mockReservationService: jest.Mocked<AbstractReservationService>;
+  let mockDataSource: jest.Mocked<DataSource>;
 
   beforeEach(async () => {
+    mockConcertService = {
+      info: jest.fn(),
+      planInfos: jest.fn(),
+      planInfo: jest.fn(),
+      availableSeats: jest.fn(),
+    } as jest.Mocked<AbstractConcertService>;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        QueueUsecase,
+        ConcertUsecase,
         {
-          provide: AbstractQueueService,
-          useValue: {
-            enter: jest.fn(),
-            myPosition: jest.fn(),
-            myQueueInfo: jest.fn(),
-          },
+          provide: AbstractConcertService,
+          useValue: mockConcertService,
+        },
+        {
+          provide: AbstractReservationService,
+          useValue: mockReservationService,
         },
         {
           provide: DataSource,
-          useValue: {
-            transaction: jest.fn(),
-          },
+          useValue: mockDataSource,
         },
       ],
     }).compile();
 
-    queueUsecase = module.get<QueueUsecase>(QueueUsecase);
-    queueService = module.get<AbstractQueueService>(AbstractQueueService);
-    dataSource = module.get<DataSource>(DataSource);
-
-    queryRunner = {
-      startTransaction: jest.fn(),
-      commitTransaction: jest.fn(),
-      rollbackTransaction: jest.fn(),
-    } as unknown as QueryRunner;
-
-    (dataSource.transaction as jest.Mock).mockImplementation((callback) => callback(queryRunner));
+    concertUsecase = module.get<ConcertUsecase>(ConcertUsecase);
   });
 
-  it('사용자가 큐에 들어가고 ResPostDto를 반환해야 한다', async () => {
-    const userId = 1;
-    const uuid = 'test-uuid';
-    const enterResult = { id: 1, status: 'waiting' };
-    const position = 3;
+  // 콘서트 예약가능일 조회 실패 테스트
+  describe('dates', () => {
+    it('콘서트 정보가 없을 경우 NotFoundException을 발생시켜야 한다', async () => {
+      const command = new ConcertRequestCommand();
 
-    // Mocking service responses
-    (queueService.enter as jest.Mock).mockResolvedValue(enterResult);
-    (queueService.myPosition as jest.Mock).mockResolvedValue(position);
+      // Mock 설정: 콘서트 정보가 없는 경우
+      mockConcertService.info.mockResolvedValueOnce(null);
 
-    const result = await queueUsecase.enter(userId, uuid);
-
-    expect(queueService.enter).toHaveBeenCalledWith(userId, uuid);
-    expect(queueService.myPosition).toHaveBeenCalledWith(enterResult.id);
-
-    // Validate the result
-    expect(result).toBeInstanceOf(ResPostDto);
-    expect(result.position).toBe(position);
-    expect(result.status).toBe(enterResult.status);
+      await expect(concertUsecase.dates(command)).rejects.toThrow(NotFoundException);
+    });
   });
 
-  it('사용자의 큐 위치를 조회하고 ResGetDto를 반환해야 한다', async () => {
-    const userId = 1;
-    const queueInfo = { id: 1, status: 'waiting' };
-    const position = 3;
+  // 콘서트 예약가능좌석 조회 실패 테스트
+  describe('seats', () => {
+    it('콘서트 일정 정보가 없을 경우 NotFoundException을 발생시켜야 한다', async () => {
+      const command = new ConcertRequestCommand();
 
-    // Mocking service responses
-    (queueService.myQueueInfo as jest.Mock).mockResolvedValue(queueInfo);
-    (queueService.myPosition as jest.Mock).mockResolvedValue(position);
+      // Mock 설정: 콘서트 일정 정보가 없는 경우
+      mockConcertService.planInfo.mockResolvedValueOnce(null);
 
-    const result = await queueUsecase.myPosition(userId);
-
-    expect(queueService.myQueueInfo).toHaveBeenCalledWith(userId);
-    expect(queueService.myPosition).toHaveBeenCalledWith(queueInfo.id);
-
-    // Validate the result
-    expect(result).toBeInstanceOf(ResGetDto);
-    expect(result.position).toBe(position);
-    expect(result.status).toBe(queueInfo.status);
+      await expect(concertUsecase.seats(command)).rejects.toThrow(NotFoundException);
+    });
   });
 
-  it('오류가 발생하면 트랜잭션이 롤백되어야 한다', async () => {
-    const userId = 1;
-    const uuid = 'test-uuid';
+  // ReservationUsecase 실패 테스트 추가
+  describe('ReservationUsecase - 실패 케이스', () => {
+    let reservationUsecase: any; // ReservationUsecase 모듈 추가 필요
 
-    // Mocking failure in queueService.enter
-    (queueService.enter as jest.Mock).mockRejectedValue(new Error('Queue enter failed'));
+    it('예약 가능 여부 확인 실패 시 ConflictException을 발생시켜야 한다', async () => {
+      const command = new ReservationRequestCommand(); // ReservationRequestCommand 가정
 
-    await expect(queueUsecase.enter(userId, uuid)).rejects.toThrow('Queue enter failed');
+      // Mock 설정: 예약 가능한 아이템이 없는 경우
+      mockReservationService.isAvailableItem.mockRejectedValueOnce(new ConflictException('이미 예약된 아이템입니다.'));
 
-    expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
+      await expect(reservationUsecase.reserve(command)).rejects.toThrow(ConflictException);
+    });
   });
 });

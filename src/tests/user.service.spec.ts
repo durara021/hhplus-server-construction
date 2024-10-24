@@ -1,38 +1,61 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/domain/user.service';
 import { AbstractUserRepository } from '../user/domain/repository.interfaces';
-import { NotFoundException } from '@nestjs/common';
+import { UserEntity } from '../user/infra/entity.interfaces';
+import { EntityManager } from 'typeorm';
 
-describe('UserService 단위테스트', () => {
+describe('UserService', () => {
   let userService: UserService;
-  let userRepository: AbstractUserRepository;
+  let mockUserRepository: AbstractUserRepository;
+  let mockEntityManager: EntityManager;
 
   beforeEach(async () => {
+    // 리포지토리 메서드 모킹
+    mockUserRepository = {
+      user: jest.fn(),  // 유저 조회 메서드 모킹
+    };
+
+    // EntityManager 모킹
+    mockEntityManager = {} as EntityManager;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
         {
           provide: AbstractUserRepository,
-          useValue: {
-            user: jest.fn(), // user 메소드를 모킹
-          },
+          useValue: mockUserRepository,  // 모킹된 리포지토리 제공
         },
       ],
     }).compile();
 
     userService = module.get<UserService>(UserService);
-    userRepository = module.get<AbstractUserRepository>(AbstractUserRepository);
   });
 
-  it('should throw NotFoundException if user is not found', async () => {
-    const userId = 1;
+  describe('유저 확인', () => {
+    it('유저가 존재하지 않을 경우 NotFoundException을 던져야 한다', async () => {
+      const userId = 1;
 
-    // userRepository.user가 null을 반환하도록 설정 (유저를 찾지 못한 시나리오)
-    jest.spyOn(userRepository, 'user').mockResolvedValueOnce(null);
+      // user 메서드가 null을 반환하도록 모킹하여 유저가 없는 상황을 시뮬레이션
+      mockUserRepository.user = jest.fn().mockResolvedValue(null);
 
-    // NotFoundException이 발생하는지 테스트
-    await expect(userService.user(userId)).rejects.toThrow(NotFoundException);
-    await expect(userService.user(userId)).rejects.toThrow('유저를 찾을 수 없습니다.');
+      // 유저가 없는 경우 NotFoundException이 발생하는지 확인
+      await expect(userService.user(userId, mockEntityManager)).rejects.toThrow(NotFoundException);
+    });
+
+    it('유저가 존재할 경우 유저 정보를 반환해야 한다', async () => {
+      const userId = 1;
+      const userEntity = new UserEntity();
+      userEntity.id = userId;
+
+      // user 메서드가 유저 엔티티를 반환하도록 모킹
+      mockUserRepository.user = jest.fn().mockResolvedValue(userEntity);
+
+      // 유저 조회 메서드 호출 및 결과 확인
+      const result = await userService.user(userId, mockEntityManager);
+
+      expect(mockUserRepository.user).toHaveBeenCalledWith(expect.any(UserEntity), mockEntityManager);
+      expect(result).toEqual(userEntity);
+    });
   });
-
 });

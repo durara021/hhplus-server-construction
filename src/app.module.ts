@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ReservationModule } from './reservation/reservation.module';
@@ -7,34 +7,38 @@ import { PaymentModule } from './payment/payment.module';
 import { AccountModule } from './account/account.module';
 import { SessionModule } from './session/session.module';
 import { SessionService } from './session/domain/session.service';
-import { APP_GUARD } from '@nestjs/core';
-import { SessionGuard } from './common/guard/session.guard';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GuardModule } from './common/guard/guard.module';
 import { QueueModule } from './queue/queue.module';
+import { CommonModule } from './common/common.module';
+import { SessionMiddleware } from './common/middleware/session.middlewere';
+import { GlobalExceptionFilter } from './common/exceptionFilter/exception.filter';
+import { SessionGuard } from './common/guard/session.guard';
+import { ReservationEntity } from './reservation/infra/entities';
+import { ConcertEntity, ConcertPlanEntity } from './concert/infra/entities';
+import { PaymentEntity } from './payment/infra/entities';
+import { AccountEntity, AccountHistoryEntity } from './account/infra/entities';
+import { SessionEntity } from './session/infra/entities';
+import { QueueEntity } from './queue/infra/entities';
 
 @Module({
   imports: [
     ReservationModule, ConcertModule, PaymentModule,
-    AccountModule, SessionModule, GuardModule, QueueModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: configService.get<string>('DB_TYPE') as any,
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
-        entities: [__dirname + '/entity/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
-        extra: {
-          connectionLimit: configService.get<number>('DB_CONNECTION_LIMIT'),
-        },
-        logging: true,
-      }),
+    AccountModule, SessionModule, QueueModule, CommonModule,
+    TypeOrmModule.forRoot({
+      type: 'mysql',  // 사용하려는 데이터베이스 유형 (예: mysql, sqlite 등)
+      host: 'localhost', // 데이터베이스 호스트
+      port: 3306,        // 포트 번호
+      username: 'tester',  // 데이터베이스 사용자 이름
+      password: 'qwe124!@$', // 데이터베이스 비밀번호
+      database: 'hhplusserverconstruction',  // 사용할 데이터베이스 이름
+      //entities: [ __dirname + '/entitiy/*.entity{.ts,.js}' ],  // 엔티티 배열
+      entities: [ ReservationEntity, ConcertEntity, ConcertPlanEntity, PaymentEntity, AccountEntity, AccountHistoryEntity, SessionEntity, QueueEntity ],  // 엔티티 배열
+      synchronize: true, // 개발 시 자동으로 스키마를 동기화 (생산 환경에서는 false로 설정 권장)
+      extra: {
+        connectionLimit: 100,
+      },
+      logging: true
     }),
   ],
   controllers: [AppController],
@@ -42,9 +46,19 @@ import { QueueModule } from './queue/queue.module';
     AppService,
     SessionService,
     {
-      provide: APP_GUARD,
-      useClass: SessionGuard, // 전역 가드로 설정
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter, // 전역 필터로 등록
     },
+    {
+      provide: APP_GUARD,
+      useClass: SessionGuard, // SessionGuard를 전역으로 등록
+    }
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SessionMiddleware)  // 전역적으로 미들웨어 적용
+      .forRoutes('*');  // 모든 경로에 적용
+  }
+}

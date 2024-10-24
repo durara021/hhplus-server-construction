@@ -1,33 +1,23 @@
-import { EntityManager, In, Not, Repository } from "typeorm";
-import { ReservationRequestEntity, ReservationResponseEntity as ReservationEntity } from "../entities";
 import { Injectable } from "@nestjs/common";
+import { EntityManager, In, Not } from "typeorm";
+import { ReservationRequestEntity, ReservationEntity } from "../entities";
 import { AbstractReservationRepository } from "../../domain/repository.interfaces";
-import { InjectRepository } from "@nestjs/typeorm";
-import { AutoManagerRepository } from "../../../common/utils/auto-manager.repository";
 import { ReservationResponseCommand } from "../../app/commands"
-import { ObjectMapper } from "src/common/mapper/object-mapper";
+import { ObjectMapper } from "../../../common/mapper/object-mapper";
 
 @Injectable()
 export class ReservationRepository implements AbstractReservationRepository {
   
-  private autoManagerRepository: AutoManagerRepository<ReservationEntity>;
-
   constructor(
-    @InjectRepository(ReservationEntity)
-    private readonly repository: Repository<ReservationEntity>,
     private readonly objectMapper: ObjectMapper,
-    private readonly entityManager?: EntityManager,
-  ) {
-    // AutoManagerRepository 인스턴스 생성
-    this.autoManagerRepository = new AutoManagerRepository(this.repository, this.entityManager);
+  ) {}
+
+  async reserve(reservationEntity:ReservationEntity, manager: EntityManager): Promise<ReservationResponseCommand> {
+    return this.objectMapper.mapObject(await manager.save(reservationEntity), ReservationResponseCommand);
   }
 
-  async reserve(reservationEntity:ReservationRequestEntity): Promise<ReservationResponseCommand> {
-    return this.objectMapper.mapObject(await this.autoManagerRepository.proxyInstance.save(reservationEntity), ReservationResponseCommand);
-  }
-
-  async reservedItems(reservatioEntity: ReservationRequestEntity): Promise<ReservationResponseCommand[]> {
-    return this.objectMapper.mapArray(await this.autoManagerRepository.proxyInstance.find(
+  async reservedItems(reservatioEntity: ReservationRequestEntity, manager: EntityManager): Promise<ReservationResponseCommand[]> {
+    return this.objectMapper.mapArray(await manager.find(ReservationEntity, 
       { where: {
           mainCateg: reservatioEntity.mainCateg,
           subCateg: reservatioEntity.subCateg,
@@ -37,36 +27,36 @@ export class ReservationRepository implements AbstractReservationRepository {
     ), ReservationResponseCommand);
   }
 
-  async statusUpdate(reservationEntity: ReservationRequestEntity): Promise<ReservationResponseCommand> {
-    await this.autoManagerRepository.proxyInstance.update(
+  async statusUpdate(reservationEntity: ReservationRequestEntity, manager: EntityManager): Promise<ReservationResponseCommand> {
+    await manager.update(ReservationEntity,
       { id: reservationEntity.id }, 
       { status: reservationEntity.status }
     )
 
-    return this.objectMapper.mapObject(await this.autoManagerRepository.proxyInstance.findOne({where: {userId: reservationEntity.id}}), ReservationResponseCommand);
+    return this.objectMapper.mapObject(await manager.findOne(ReservationEntity,{where: {id: reservationEntity.id}}), ReservationResponseCommand);
   }
   
-  async statusesUpdate(reservationEntity: ReservationRequestEntity): Promise<void> {
-    const result = await this.autoManagerRepository.proxyInstance.update(
+  async statusesUpdate(reservationEntity: ReservationRequestEntity, manager: EntityManager): Promise<void> {
+    const result = await manager.update(ReservationEntity,
       { id: In(reservationEntity.ids) }, 
       { status: reservationEntity.status }
     )
   }
-  async reservedItem(reservationEntity: ReservationRequestEntity): Promise<ReservationResponseCommand> {
-    return this.objectMapper.mapObject(await this.autoManagerRepository.proxyInstance.findOne(
+  async reservedItem(reservationEntity: ReservationRequestEntity, manager: EntityManager): Promise<ReservationResponseCommand> {
+    return this.objectMapper.mapObject(await manager.findOne(ReservationEntity,
       { where : {
           mainCateg: reservationEntity.mainCateg,
           subCateg: reservationEntity.subCateg,
           minorCateg: reservationEntity.minorCateg,
-          status: Not('temp')
+          status: Not('expired')
         }
       }
     ), ReservationResponseCommand);
   }
 
-  async itemsByStatus(reservationEntity: ReservationRequestEntity): Promise<ReservationResponseCommand[]> {
+  async itemsByStatus(reservationEntity: ReservationRequestEntity, manager: EntityManager): Promise<ReservationResponseCommand[]> {
     return this.objectMapper.mapArray(
-      await this.autoManagerRepository.proxyInstance.find(
+      await manager.find(ReservationEntity,
         { where : {
             status: Not(reservationEntity.status)
           }

@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { QueueEntity } from '../../infra/repositories/entities';
 import { QueueRequestModel } from '../models';
-import { QueueResponseCommand } from 'src/queue/app/commands';
+import { QueueResponseCommand } from '../../app/commands';
+import { EntityManager } from 'typeorm';
 
 interface QueueServiceInterface {
-  enter(model: QueueRequestModel): Promise<QueueResponseCommand>
-  myPosition(model: QueueRequestModel):Promise<QueueResponseCommand>
-  expire(model: QueueRequestModel): Promise<QueueResponseCommand>
-  myQueueInfo(model: QueueRequestModel): Promise<QueueResponseCommand>
+  enter(model: QueueRequestModel, manager:EntityManager): Promise<QueueResponseCommand>
+  myPosition(model: QueueRequestModel, manager:EntityManager):Promise<QueueResponseCommand>
+  expire(model: QueueRequestModel, manager:EntityManager): Promise<QueueResponseCommand>
+  myQueueInfo(model: QueueRequestModel, manager:EntityManager): Promise<QueueResponseCommand>
 }
 
 @Injectable()
 export abstract class AbstractQueueService implements QueueServiceInterface {
-  abstract enter(model: QueueRequestModel): Promise<QueueResponseCommand>
-  abstract myPosition(model: QueueRequestModel):Promise<QueueResponseCommand>
-  abstract expire(model: QueueRequestModel): Promise<QueueResponseCommand>
-  abstract myQueueInfo(model: QueueRequestModel): Promise<QueueResponseCommand>
+  abstract enter(model: QueueRequestModel, manager:EntityManager): Promise<QueueResponseCommand>
+  abstract myPosition(model: QueueRequestModel, manager:EntityManager):Promise<QueueResponseCommand>
+  abstract expire(model: QueueRequestModel, manager:EntityManager): Promise<QueueResponseCommand>
+  abstract myQueueInfo(model: QueueRequestModel, manager:EntityManager): Promise<QueueResponseCommand>
 }

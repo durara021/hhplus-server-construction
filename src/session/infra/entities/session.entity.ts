@@ -16,7 +16,7 @@ export class SessionEntity {
   @Column()
   status: string;
 
-  @CreateDateColumn({default: Date.now()})
-  regDate: number;
+  @CreateDateColumn()
+  regDate: Date;
 
 }

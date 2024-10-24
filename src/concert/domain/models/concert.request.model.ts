@@ -1,11 +1,11 @@
 export class ConcertRequestModel {
   concertId: number;
-  concertSeats?: number[];
-  concertDate?: string;
+  concertSeats: number[] = [];
+  concertDate: string;
   concertPlanId: number;
-  capacity?: number;
+  capacity: number;
 
   updateSeats(seats: number[]) {
-    this.concertSeats =seats;
+    this.concertSeats = seats
   }
 }

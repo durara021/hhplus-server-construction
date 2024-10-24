@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource } from "typeorm";
+import { DataSource, EntityManager } from "typeorm";
 import { AbstractPaymentService } from '../domain/payemnt.service.interfaces';
 import { PaymentPostResponseDto as ResPostDto } from '../pres/dto';
 import { AbstractAccountService } from "../../account/domain/service.interfaces";
 import { AbstractQueueService } from "../../queue/domain/service.interfaces";
 import { AbstractReservationService } from "../../reservation/domain/service.interfaces";
-import { ObjectMapper } from "src/common/mapper/object-mapper";
+import { ObjectMapper } from "../../common/mapper/object-mapper";
 import { PaymentRequestCommand } from "./commands";
 import { AccountRequestModel } from '../../account/domain/models';
 import { PaymentRequestModel } from '../../payment/domain/models';
@@ -25,21 +25,21 @@ export class PaymentUsecase {
     ) {}
 
     async pay(command: PaymentRequestCommand): Promise<ResPostDto>{
-        return await this.dataSource.transaction(async () => {
+        return await this.dataSource.transaction(async (manager: EntityManager) => {
             //계좌 point 차감
-            const balance = (await this.accountService.point(this.objectMapper.mapObject(command, AccountRequestModel)));
+            const balance = (await this.accountService.point(this.objectMapper.mapObject(command, AccountRequestModel), manager));
             let acouuntReqModel = this.objectMapper.mapObject(balance, AccountRequestModel);
             acouuntReqModel.updateAmount(command.price);
             acouuntReqModel = this.objectMapper.mapObject((await this.accountService.use(acouuntReqModel)), AccountRequestModel);
-            await this.accountService.update(acouuntReqModel);
+            await this.accountService.update(acouuntReqModel, manager);
 
             //예약 확정
             const reservationReqModel = this.objectMapper.mapObject(command, ReservationRequestModel);
             reservationReqModel.updateStatus('confirmed');
-            await this.reservationService.reserve(reservationReqModel);
+            await this.reservationService.reserve(reservationReqModel, manager);
 
-            const recordResult = await this.paymentService.record(this.objectMapper.mapObject(command, PaymentRequestModel));
-            await this.queueService.expire(this.objectMapper.mapObject(command, QueueRequestModel));
+            const recordResult = await this.paymentService.record(this.objectMapper.mapObject(command, PaymentRequestModel), manager);
+            await this.queueService.expire(this.objectMapper.mapObject(command, QueueRequestModel), manager);
             
             return this.objectMapper.mapObject(recordResult, ResPostDto);
         });

@@ -1,17 +1,19 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaymentService } from './domain/payment.service';
 import { PaymentController } from './pres/payment.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { PaymentEntity } from './domain/entities';
+import { PaymentEntity } from './infra/entities';
 import { AbstractPaymentService } from './domain/payemnt.service.interfaces';
 import { AbstractPaymentRepository } from './domain/repository.interfaces';
 import { PaymentRepository } from './infra/payment.repositories/payment.repository';
 import { PaymentUsecase } from './app/payment.use-case';
 import { ReservationModule } from '../reservation/reservation.module';
 import { AccountModule } from '../account/account.module';
+import { CommonModule } from '../common/common.module';
+import { QueueModule } from '../queue/queue.module';
 
 @Module({
-  imports: [ TypeOrmModule.forFeature([PaymentEntity]), ReservationModule, AccountModule ],
+  imports: [ TypeOrmModule.forFeature([PaymentEntity]), ReservationModule, AccountModule, QueueModule, CommonModule ],
   controllers: [PaymentController],
   providers: [
     PaymentUsecase, 

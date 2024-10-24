@@ -6,7 +6,7 @@ export class ReservationRequestModel {
     subCateg: number;            // 중분류
     minorCateg: number;          // 소분류
     status: string;              // 예약 상태
-
+      
     updateStatus(newStatus: string) {
         this.status = newStatus;
     }

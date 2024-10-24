@@ -1,24 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { SessionPostResponseDto as ResPostDto } from "../pres/dto";
-import { SessionService } from '../domain/session.service';
 import { AbstractUserService } from '../../user/domain/service.interfaces/user.service.interface';
+import { DataSource, EntityManager } from 'typeorm';
+import { AbstractSessionService } from '../domain/service.interfaces/session.service.interface';
 
 @Injectable()
 export class SessionUsecase {
 
     constructor(
-        private readonly sessionService: SessionService,
+        private readonly sessionService: AbstractSessionService,
         private readonly userService: AbstractUserService,
+        private readonly dataSource: DataSource,
     ) {}
 
     //세션 생성
     async create(userId: number): Promise<ResPostDto> {
-        //아이디 확인
-        const user = await this.userService.user(userId);
-        //세션 생성
-        const session = await this.sessionService.create(user.id);
+        return await this.dataSource.transaction(async (manager: EntityManager) => {
+            //아이디 확인
+            const user = await this.userService.user(userId, manager);
+            //세션 생성
+            const session = await this.sessionService.create(user.id, manager);
 
-        return new ResPostDto(session.uuid, session.userId, new Date(session.regDate));
+            return new ResPostDto(session.uuid, session.userId, new Date(session.regDate));
+        });
     }
 
 }

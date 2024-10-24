@@ -6,6 +6,6 @@ export class ReservationResponseCommand {
   userId: number; // 예약자 id
   regDate: Date; // 최초 예약일
   status: string; // 예약 상태 = 임시/확정/취소
-  modDate: Date; // 상태 변경일
+  modDate: Date ; // 상태 변경일
 }
 

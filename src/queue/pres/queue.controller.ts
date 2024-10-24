@@ -3,7 +3,7 @@ import { QueuePostResponseDto, QueueGetResponseDto, QueueGetRequestDto } from '.
 import { QueueRequestCommand } from '../app/commands';
 import { QueueUsecase } from '../app/queue.use-case';
 import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ObjectMapper } from 'src/common/mapper/object-mapper';
+import { ObjectMapper } from '../../common/mapper/object-mapper';
 
 @ApiTags('대기열 API') // 컨트롤러 태그 설정
 @Controller('queues')

@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ConcertRequestModel } from '../models';
-import { ConcertResponseCommand } from 'src/concert/app/commands';
+import { ConcertResponseCommand } from '../../app/commands';
+import { EntityManager } from 'typeorm';
 
 interface ConcertServiceInterface  {
-  info(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand>
-  availableSeats(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand>
-  planInfos(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand> 
-  planInfo(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand>
+  info(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand>
+  availableSeats(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand>
+  planInfos(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand> 
+  planInfo(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand>
 }
 
 @Injectable()
 export abstract class AbstractConcertService implements ConcertServiceInterface {
-  abstract info(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand>
-  abstract availableSeats(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand>
-  abstract planInfos(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand>
-  abstract planInfo(RequestModel: ConcertRequestModel): Promise<ConcertResponseCommand>
+  abstract info(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand>
+  abstract availableSeats(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand>
+  abstract planInfos(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand>
+  abstract planInfo(RequestModel: ConcertRequestModel, manager:EntityManager): Promise<ConcertResponseCommand>
 } 

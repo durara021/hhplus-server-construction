@@ -1,12 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
-
+import { CustomLogger } from '../logger/custom.logger';
 @Injectable()
 export class ObjectMapper {
-  private readonly logger = new Logger(ObjectMapper.name); // 클래스 이름을 로깅에 포함
+
+  constructor(
+    private readonly logger: CustomLogger
+  ) {}
 
   // 객체 변환 로직
   mapObject<T extends Record<string, any>, U>(source: T, targetClass: new () => U): U {
     const targetInstance = new targetClass();
+
+    // 호출한 클래스와 메서드 정보를 가져옴
+    this.logger.getCallerInfo();
+
+    this.logger.debug('Start mapping');
+
     for (const key in targetInstance) {
       const sourceValue = source[key as keyof T];
       const targetValue = targetInstance[key as keyof U];
@@ -16,6 +25,9 @@ export class ObjectMapper {
         targetInstance[key as keyof U] = this.customTransform(sourceValue, targetValue);
       }
     }
+
+    this.logger.debug('Mapping completed');
+
     return targetInstance;
   }
 
@@ -26,6 +38,8 @@ export class ObjectMapper {
 
   // 커스텀 타입 변환 로직
   private customTransform(sourceValue: any, targetValue: any): any {
+    this.logger.debug(`Performing custom transform from ${typeof sourceValue} to ${typeof targetValue}`);
+
     if (typeof targetValue === 'number') {
       // 문자열을 숫자로 변환
       return parseInt(sourceValue);

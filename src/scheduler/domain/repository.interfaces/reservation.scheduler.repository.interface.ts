@@ -1,14 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import { ReservationSchedulerEntity } from "../entities";
-import { ReservationResponseEntity } from "../../../reservation/infra/entities";
+import { ReservationSchedulerEntity } from "../../infra/entities";
+import { ReservationEntity } from "../../../reservation/infra/entities";
+import { EntityManager } from "typeorm";
 
 interface ReservationSchedulerRepositoryInterface{
-    items(reservationSchedulerEntity: ReservationSchedulerEntity): Promise<ReservationResponseEntity[]>
-    updateStatus(reservationSchedulerEntity: ReservationSchedulerEntity): Promise<number>
+    items(reservationSchedulerEntity: ReservationSchedulerEntity, manager: EntityManager): Promise<ReservationEntity[]>
+    updateStatus(reservationSchedulerEntity: ReservationSchedulerEntity, manager: EntityManager): Promise<number>
 }
 
 @Injectable()
 export abstract class AbstractReservationSchedulerRepository implements ReservationSchedulerRepositoryInterface{
-    abstract items(reservationSchedulerEntity: ReservationSchedulerEntity): Promise<ReservationResponseEntity[]>
-    abstract updateStatus(reservationSchedulerEntity: ReservationSchedulerEntity): Promise<number>
+    abstract items(reservationSchedulerEntity: ReservationSchedulerEntity, manager: EntityManager): Promise<ReservationEntity[]>
+    abstract updateStatus(reservationSchedulerEntity: ReservationSchedulerEntity, manager: EntityManager): Promise<number>
 }

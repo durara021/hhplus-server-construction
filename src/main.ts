@@ -17,9 +17,6 @@ async function bootstrap() {
     
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document); // '/api-docs' 경로에 Swagger UI 설정
-
-  // 전역 가드 설정
-  app.useGlobalGuards(new SessionGuard(app.get(SessionService)));
   
   await app.listen(3000);
 }

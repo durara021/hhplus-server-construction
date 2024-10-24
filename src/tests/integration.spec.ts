@@ -1,73 +1,132 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getDataSourceToken } from '@nestjs/typeorm';
 import { AccountModule } from '../account/account.module';
 import { ConcertModule } from '../concert/concert.module';
 import { PaymentModule } from '../payment/payment.module';
 import { QueueModule } from '../queue/queue.module';
 import { ReservationModule } from '../reservation/reservation.module';
 import { SessionModule } from '../session/session.module';
-import * as request from 'supertest';
-import { INestApplication } from '@nestjs/common';
-import { GuardModule } from '../common/guard/guard.module';
+import { CommonModule } from '../common/common.module';
+import { ReservationUsecase } from '../reservation/app/reservation.use-case';
+import { AbstractReservationService } from '../reservation/domain/service.interfaces';
+import { ReservationService } from '../reservation/domain/reservation.service';
+import { DataSource, QueryRunner } from 'typeorm';
+import { AbstractReservationRepository } from '../reservation/domain/repository.interfaces';
+import { ReservationRepository } from '../reservation/infra/repositories/reservation.repository';
+import { ReservationEntity } from '../reservation/infra/entities';
+import { ConcertEntity, ConcertPlanEntity } from '../concert/infra/entities';
+import { PaymentEntity } from '../payment/infra/entities';
+import { AccountEntity, AccountHistoryEntity } from '../account/infra/entities';
+import { SessionEntity } from '../session/infra/entities';
+import { QueueEntity } from '../queue/infra/entities';
+import { AccountUsecase } from 'src/account/app/account.use-case';
+import { AbstractAccountService } from 'src/account/domain/service.interfaces';
+import { AbstractAccountRepository } from 'src/account/domain/repository.interfaces';
+import { AccountRepository } from 'src/account/infra/repositories';
+import { AccountService } from 'src/account/domain/account.service';
+import { PaymentUsecase } from 'src/payment/app/payment.use-case';
+import { AbstractPaymentService } from 'src/payment/domain/payemnt.service.interfaces';
+import { AbstractPaymentRepository } from 'src/payment/domain/repository.interfaces';
+import { PaymentService } from 'src/payment/domain/payment.service';
+import { PaymentRepository } from 'src/payment/infra/payment.repositories/payment.repository';
 
 describe('통합 테스트', () => {
-  let app: INestApplication;
+  let reservationUsecase: ReservationUsecase;
+  let accountUseCase: AccountUsecase;
+  let paymentUseCase: PaymentUsecase;
+  let dataSource: DataSource;
+  let queryRunner: QueryRunner;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         ReservationModule, ConcertModule, PaymentModule,
-        AccountModule, SessionModule, GuardModule, QueueModule,
+        AccountModule, SessionModule, QueueModule, CommonModule,
         TypeOrmModule.forRoot({
-          type: 'mysql',  // 사용하려는 데이터베이스 유형 (예: mysql, sqlite 등)
-          host: 'localhost', // 데이터베이스 호스트
-          port: 3306,        // 포트 번호
-          username: 'tester',  // 데이터베이스 사용자 이름
-          password: 'qwe124!@$', // 데이터베이스 비밀번호
-          database: 'hhpluscleanarchitecture',  // 사용할 데이터베이스 이름
-          entities: [ __dirname + '/entitiy/*.entity{.ts,.js}' ],  // 엔티티 배열
-          synchronize: true, // 개발 시 자동으로 스키마를 동기화 (생산 환경에서는 false로 설정 권장)
+          type: 'mysql',
+          host: 'localhost',
+          port: 3306,
+          username: 'tester',
+          password: 'qwe124!@$',
+          database: 'hhplusserverconstruction',
+          entities: [ ReservationEntity, ConcertEntity, ConcertPlanEntity, PaymentEntity, AccountEntity, AccountHistoryEntity, SessionEntity, QueueEntity ],
+          synchronize: true,
           extra: {
             connectionLimit: 100,
           },
-          logging: true
+          //logging: true,
         }),
+      ],
+      providers: [
+        ReservationUsecase, 
+        { provide: AbstractReservationService, useClass: ReservationService },
+        { provide: AbstractReservationRepository, useClass: ReservationRepository },
+        AccountUsecase,
+        { provide: AbstractAccountService, useClass: AccountService },
+        { provide: AbstractAccountRepository, useClass: AccountRepository },
+        PaymentUsecase,
+        { provide: AbstractPaymentService, useClass: PaymentService },
+        { provide: AbstractPaymentRepository, useClass: PaymentRepository },
       ],
     }).compile();
 
-    app = module.createNestApplication();
-    await app.init();
+    reservationUsecase = module.get<ReservationUsecase>(ReservationUsecase);
+    accountUseCase = module.get<AccountUsecase>(AccountUsecase);
+
+    dataSource = module.get<DataSource>(getDataSourceToken());
+
+    if (!dataSource.isInitialized) {
+      await dataSource.initialize();
+    }
+
+    // QueryRunner 생성
+    queryRunner = dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    // 테스트 전 데이터 초기화
+    //await queryRunner.query('DELETE FROM reservation');
   });
   
   afterAll(async () => {
-    await app.close();
+    await queryRunner.release();
+    if (dataSource.isInitialized) {
+      await dataSource.destroy();
+    }
   });
 
-  it('/reservations (POST)', () => {
-    return request(app.getHttpServer())
-      .post('/reservations') // POST로 변경
-      .send({ userId: 1 })
-      .expect((response) => {
-        console.log(response);
-      });
+  it('예약 동시성 테스트', async () => {
+    const tests = [];
+    for (let i = 1; i <= 5; i++) {
+      const test = reservationUsecase.reserve({ mainCateg: 1, subCateg: 1, minorCateg: 1, userId: i });
+      tests.push(test);
+    }
+    
+    await Promise.all(tests);
+    const result = await queryRunner.query('SELECT COUNT(1) as count FROM reservation WHERE mainCateg = 1 AND subCateg = 1 AND minorCateg = 1');
+    expect(result[0].count).toBe(1);
   });
 
-  it('/concerts/:concertId/dates (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/concerts/123/dates')
-      .expect((response) => {
-        console.log(response);
-      });
+  it('충전 동시성 테스트', async () => {
+    const tests = [];
+    for (let i = 1; i <= 5; i++) {
+      const test = await accountUseCase.charge({ userId: 1, amount: 1000 });
+      tests.push(test);
+    }
+    
+    await Promise.all(tests);
+    const result = await queryRunner.query('SELECT balance FROM account WHERE userId = 1');
+    expect(result[0].balance).toBe(5000);
   });
 
-  it('/payments (POST)', () => {
-    return request(app.getHttpServer())
-      .post('/payments')
-      .send({ userId:1, reservationId:1 })
-      .expect(201)
-      .expect((response) => {
-        console.log(response);
-      });
-    });
-
+  it('결재 동시성 테스트', async () => {
+    const tests = [];
+    for (let i = 1; i <= 3; i++) {
+      const test = paymentUseCase.pay({ userId:1, price:1000, reservationId: 1 });
+      tests.push(test);
+    }
+    
+    await Promise.all(tests);
+    const result = await queryRunner.query('SELECT COUNT(1) as count FROM reservation WHERE mainCateg = 1 AND subCateg = 1 AND minorCateg = 1');
+    expect(result[0].count).toBe(2000);
+  });
 });

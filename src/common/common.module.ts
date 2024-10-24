@@ -1,9 +1,15 @@
-// common.module.ts
 import { Module } from '@nestjs/common';
-import { AutoManagerRepository } from './utils/auto-manager.repository';
+import { CustomLogger } from './logger/custom.logger';
+import { ObjectMapper } from './mapper/object-mapper';
 
 @Module({
-  providers: [AutoManagerRepository],
-  exports: [AutoManagerRepository],
+  providers: [
+    CustomLogger, 
+    ObjectMapper,
+  ],
+  exports: [
+    CustomLogger, 
+    ObjectMapper,
+  ]
 })
 export class CommonModule {}
